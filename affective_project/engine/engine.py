@@ -1,8 +1,32 @@
 """Public engine entry point; perception and later phases are composed here."""
+import os
+
 from .policy.policy import choose_action
 from .policy.replies import render_reply
 from .perception.text_estimator import estimate_text
 from .state.tracker import StateTracker
+
+
+def _internal_error_response(error):
+    """Return a contract-valid clarification while exposing the error type."""
+    return {
+        "valence": 0.0,
+        "activity": 0.0,
+        "dominance": 0.0,
+        "confidence": 0.05,
+        "label": "neutral",
+        "action": "ASK_CLARIFICATION",
+        "reply": (
+            "I could not process that message. Please try rephrasing it or "
+            "share a little more detail. / Não consegui processar a mensagem. "
+            "Tente formulá-la de outra forma ou partilhe mais detalhes."
+        ),
+        "flags": ["internal_error"],
+        "details": {
+            "error_type": type(error).__name__,
+            "engine_version": "0.4",
+        },
+    }
 
 
 class Engine:
@@ -14,6 +38,16 @@ class Engine:
         self.state_tracker = StateTracker()
 
     def process(self, text, audio_path=None, image_path=None):
+        """Return a valid result on errors, unless strict testing is enabled."""
+        try:
+            return self._process(text, audio_path, image_path)
+        except Exception as error:
+            if os.environ.get("ENGINE_STRICT") == "1":
+                raise
+            self.reset()
+            return _internal_error_response(error)
+
+    def _process(self, text, audio_path=None, image_path=None):
         """Estimate affect, update state, apply policy, and render a reply."""
         estimate = estimate_text(
             text, context_valence=self.state_tracker.context_valence

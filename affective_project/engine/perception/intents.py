@@ -2,6 +2,8 @@
 import re
 import unicodedata
 
+from .text_matching import matching_phrases
+
 
 _CUES = {
     "en": {
@@ -183,6 +185,16 @@ _CUES = {
         ),
     },
 }
+_CUE_INTENTS = {}
+_LANGUAGE_CUES = {}
+for _language, _intents in _CUES.items():
+    _cue_intents = {}
+    for _intent, _cues in _intents.items():
+        for _cue in _cues:
+            _cue_intents.setdefault(_cue, set()).add(_intent)
+    _CUE_INTENTS[_language] = _cue_intents
+    _LANGUAGE_CUES[_language] = tuple(_cue_intents)
+
 _PRODUCTS = {
     "laptop": ("laptop", "notebook", "portátil"),
     "phone": ("phone", "smartphone", "telemóvel", "celular"),
@@ -197,10 +209,9 @@ _ORDER_NUMBER_RE = re.compile(
     r"\b(?:order|pedido|encomenda)\s*(?:#|number|no\.?|nº|número)?\s*(\d{3,8})\b",
     re.IGNORECASE,
 )
-
-
-def _contains(text, phrase):
-    return re.search(r"(?<!\w)%s(?!\w)" % re.escape(phrase), text) is not None
+_PRODUCT_TERMS = tuple(
+    term for terms in _PRODUCTS.values() for term in terms
+)
 
 
 def _candidate_languages(language):
@@ -215,11 +226,19 @@ def detect_intent(text, language):
     """Choose one support intent; explicit human requests take precedence."""
     normalized = unicodedata.normalize("NFKC", text).lower()
     languages = _candidate_languages(language)
-    if any(
-        _contains(normalized, cue)
+    matched_cues = set()
+    for candidate in languages:
+        matched_cues.update(
+            matching_phrases(normalized, _LANGUAGE_CUES[candidate])
+        )
+    matched_intents = {
+        intent
         for candidate in languages
-        for cue in _CUES[candidate]["HUMAN_REQUEST"]
-    ):
+        for cue in matched_cues
+        for intent in _CUE_INTENTS[candidate].get(cue, ())
+    }
+
+    if "HUMAN_REQUEST" in matched_intents:
         intent = "HUMAN_REQUEST"
     else:
         priority = (
@@ -237,11 +256,7 @@ def detect_intent(text, language):
         )
         intent = "UNKNOWN"
         for candidate_intent in priority:
-            if any(
-                _contains(normalized, cue)
-                for language_code in languages
-                for cue in _CUES[language_code].get(candidate_intent, ())
-            ):
+            if candidate_intent in matched_intents:
                 intent = candidate_intent
                 break
 
@@ -249,8 +264,9 @@ def detect_intent(text, language):
     order_match = _ORDER_NUMBER_RE.search(normalized)
     if order_match:
         entities["order_number"] = order_match.group(1)
+    matched_products = matching_phrases(normalized, _PRODUCT_TERMS)
     for product, terms in _PRODUCTS.items():
-        if any(_contains(normalized, term) for term in terms):
+        if any(term in matched_products for term in terms):
             entities["product"] = product
             break
     return intent, entities

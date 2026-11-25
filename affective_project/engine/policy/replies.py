@@ -1,34 +1,112 @@
 """Short deterministic replies that avoid claims about live order systems."""
 
 _EN_STEPS = {
-    "HUMAN_REQUEST": "I can offer a handoff to a human support agent.",
-    "DELIVERY_DELAY": "I can help check the delivery details{subject}.",
-    "DAMAGED_OR_DEFECTIVE": "I can help review the options{subject}.",
-    "WRONG_ITEM": "I can help review the options for the item you received.",
-    "REFUND_RETURN": "I can explain the return steps and how to start a request.",
-    "PAYMENT_BILLING": "I can help review the payment details with you.",
-    "ACCOUNT_LOGIN": "I can guide you through account access steps.",
-    "PRODUCT_QUESTION": "I can help explain the product information.",
-    "ORDER_STATUS": "I can help check the order details{subject}.",
-    "CLOSING_THANKS": "I can continue to help if something is still unresolved.",
-    "GREETING": "I can help with a NovaShop question.",
-    "COMPLAINT_GENERAL": "I can help identify a practical next step.",
-    "UNKNOWN": "I can help with a NovaShop question.",
+    "HUMAN_REQUEST": (
+        "I can offer a handoff to a human support agent.",
+        "I can ask the support team to connect you with a person.",
+    ),
+    "DELIVERY_DELAY": (
+        "Please share your order number and latest tracking update so I can help review the delay.",
+        "Tell me your order number and what the tracking page currently shows, and I can help review the delay.",
+    ),
+    "DAMAGED_OR_DEFECTIVE": (
+        "Please describe the issue{subject} and share the order number so I can outline the next support steps.",
+        "Tell me what is wrong{subject} and include your order number so I can explain the available support options.",
+    ),
+    "WRONG_ITEM": (
+        "Please share your order number and tell me what you ordered and what arrived so support can review the next step.",
+        "Tell me what you expected and what arrived, with the order number, so support can review the mismatch.",
+    ),
+    "REFUND_RETURN": (
+        "Tell me whether you want a return or refund, and share your order number so I can explain the next steps.",
+        "Share your order number and say whether you are asking about a return or refund so I can outline the process.",
+    ),
+    "PAYMENT_BILLING": (
+        "Please share your order number and describe the charge without sending card details so I can help review it.",
+        "Describe the billing issue and include the order number if available; do not send card details.",
+    ),
+    "ACCOUNT_LOGIN": (
+        "Share the sign-in error, not your password or verification code, so I can guide the account-recovery step.",
+        "Tell me what happens when you try to sign in; please do not share passwords or verification codes.",
+    ),
+    "PRODUCT_QUESTION": (
+        "Share the product model and the feature or specification you want to check.",
+        "Tell me the product model and what feature you would like to know about.",
+    ),
+    "ORDER_STATUS": (
+        "Please share your order number and latest tracking update so I can help review the order status.",
+        "Send the order number and most recent tracking update, and I can help interpret the status.",
+    ),
+    "CLOSING_THANKS": (
+        "I can continue to help if something is still unresolved.",
+        "If another question comes up, tell me what you need and I can help with the next step.",
+    ),
+    "GREETING": (
+        "Tell me what you would like help with, and I will guide you to the next step.",
+        "Share your question and I will help identify a useful next step.",
+    ),
+    "COMPLAINT_GENERAL": (
+        "Please describe what happened and include the order number if it concerns an order.",
+        "Tell me what went wrong; if it is about an order, include its order number.",
+    ),
+    "UNKNOWN": (
+        "I can help with a NovaShop question.",
+        "Tell me what you would like to know, and I can suggest a next step.",
+    ),
 }
 _PT_STEPS = {
-    "HUMAN_REQUEST": "Posso oferecer o encaminhamento para um agente humano.",
-    "DELIVERY_DELAY": "Posso ajudar a verificar os detalhes da entrega{subject}.",
-    "DAMAGED_OR_DEFECTIVE": "Posso ajudar a rever as opções{subject}.",
-    "WRONG_ITEM": "Posso ajudar a rever as opções para o artigo recebido.",
-    "REFUND_RETURN": "Posso explicar os passos da devolução e como iniciar um pedido.",
-    "PAYMENT_BILLING": "Posso ajudar a analisar os detalhes do pagamento.",
-    "ACCOUNT_LOGIN": "Posso orientar os passos para aceder à conta.",
-    "PRODUCT_QUESTION": "Posso ajudar a explicar as informações do produto.",
-    "ORDER_STATUS": "Posso ajudar a verificar os detalhes da encomenda{subject}.",
-    "CLOSING_THANKS": "Posso continuar a ajudar se ainda houver alguma questão por resolver.",
-    "GREETING": "Posso ajudar com uma questão da NovaShop.",
-    "COMPLAINT_GENERAL": "Posso ajudar a identificar um próximo passo prático.",
-    "UNKNOWN": "Posso ajudar com uma questão da NovaShop.",
+    "HUMAN_REQUEST": (
+        "Posso encaminhar o pedido para um agente de apoio humano.",
+        "Posso pedir à equipa de apoio que o contacte através de uma pessoa.",
+    ),
+    "DELIVERY_DELAY": (
+        "Indique o número da encomenda e a atualização mais recente do rastreio para eu ajudar a analisar o atraso.",
+        "Diga-me o número da encomenda e o que aparece no rastreio para eu ajudar a analisar o atraso.",
+    ),
+    "DAMAGED_OR_DEFECTIVE": (
+        "Descreva o problema{subject} e indique o número da encomenda para eu explicar os próximos passos de apoio.",
+        "Diga o que está danificado{subject} e inclua o número da encomenda para eu explicar as opções de apoio.",
+    ),
+    "WRONG_ITEM": (
+        "Indique o número da encomenda e diga o que pediu e o que recebeu para a equipa poder analisar o próximo passo.",
+        "Descreva o artigo esperado e o recebido, com o número da encomenda, para a equipa poder analisar a troca.",
+    ),
+    "REFUND_RETURN": (
+        "Diga se pretende devolver o artigo ou pedir um reembolso e indique o número da encomenda para eu explicar os próximos passos.",
+        "Partilhe o número da encomenda e indique se pretende uma devolução ou um reembolso para eu explicar o processo.",
+    ),
+    "PAYMENT_BILLING": (
+        "Indique o número da encomenda e descreva a cobrança sem enviar dados do cartão para eu ajudar a analisá-la.",
+        "Descreva o problema de faturação e indique o número da encomenda, se disponível; não envie dados do cartão.",
+    ),
+    "ACCOUNT_LOGIN": (
+        "Descreva o erro de acesso, sem partilhar a palavra-passe ou códigos, para eu orientar o passo de recuperação da conta.",
+        "Diga o que acontece ao iniciar sessão; não partilhe palavras-passe nem códigos de verificação.",
+    ),
+    "PRODUCT_QUESTION": (
+        "Indique o modelo do produto e a característica ou especificação que pretende verificar.",
+        "Diga qual é o modelo do produto e que característica pretende conhecer.",
+    ),
+    "ORDER_STATUS": (
+        "Indique o número da encomenda e a atualização mais recente do rastreio para eu ajudar a verificar o estado.",
+        "Partilhe o número da encomenda e o que aparece no rastreio para eu ajudar a interpretar o estado.",
+    ),
+    "CLOSING_THANKS": (
+        "Posso continuar a ajudar se ainda houver alguma questão por resolver.",
+        "Se surgir outra questão, diga-me o que precisa e indicarei o próximo passo.",
+    ),
+    "GREETING": (
+        "Diga-me com o que precisa de ajuda e indicarei o próximo passo.",
+        "Partilhe a sua questão e ajudarei a identificar um próximo passo útil.",
+    ),
+    "COMPLAINT_GENERAL": (
+        "Descreva o que aconteceu e indique o número da encomenda se a questão for sobre uma encomenda.",
+        "Diga-me o que correu mal; se for sobre uma encomenda, inclua o respetivo número.",
+    ),
+    "UNKNOWN": (
+        "Posso ajudar com uma questão da NovaShop.",
+        "Diga-me o que gostaria de saber e posso sugerir um próximo passo.",
+    ),
 }
 _EN_PROBLEMS = {
     "DELIVERY_DELAY": "the delivery issue",
@@ -144,6 +222,11 @@ def _variant(templates, turn_index):
     return templates[(max(1, int(turn_index)) - 1) % len(templates)]
 
 
+def _step(steps, intent, turn_index, subject):
+    template = _variant(steps.get(intent, steps["UNKNOWN"]), turn_index)
+    return template.format(subject=subject)
+
+
 def render_reply(action, intent, language, turn_index, entities=None, flags=None):
     """Render a two-variant reply in a supported language or bilingually."""
     entities = entities or {}
@@ -196,24 +279,31 @@ def render_reply(action, intent, language, turn_index, entities=None, flags=None
         )
 
     if language == "pt":
-        step = _PT_STEPS.get(intent, _PT_STEPS["UNKNOWN"]).format(
-            subject=subject
-        )
+        step = _step(_PT_STEPS, intent, turn_index, subject)
         if intent == "UNKNOWN" and "no_affect_words" in flags:
-            step = (
-                "Diga-me um pouco mais sobre a sua questão. Se for sobre uma "
-                "encomenda, indique o número da encomenda."
+            step = _variant(
+                (
+                    "Diga-me mais sobre a sua questão. Se for sobre uma "
+                    "encomenda, indique o número da encomenda.",
+                    "Se a questão for sobre uma encomenda, partilhe o número "
+                    "da encomenda "
+                    "e diga que informação precisa.",
+                ),
+                turn_index,
             )
         problem = _problem(intent, entities, language)
         pattern = _variant(_PT_ACTION_PATTERNS[action], turn_index)
     else:
-        step = _EN_STEPS.get(intent, _EN_STEPS["UNKNOWN"]).format(
-            subject=subject
-        )
+        step = _step(_EN_STEPS, intent, turn_index, subject)
         if intent == "UNKNOWN" and "no_affect_words" in flags:
-            step = (
-                "Tell me a little more about your question. If it concerns an "
-                "order, please include the order number."
+            step = _variant(
+                (
+                    "Tell me more about your question. If it concerns an "
+                    "order, please include the order number.",
+                    "If this is about an order, share its number and tell me "
+                    "what information you need.",
+                ),
+                turn_index,
             )
         problem = _problem(intent, entities, language)
         pattern = _variant(_EN_ACTION_PATTERNS[action], turn_index)

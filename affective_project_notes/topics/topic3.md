@@ -83,6 +83,18 @@ live order data or promise a refund. Unsupported-language replies ask the
 customer to use English or Portuguese and offer a human handoff in both
 languages.
 
+### Phase 5 hardening
+
+`Engine.process()` catches unexpected internal failures at the public
+boundary, clears the damaged conversation state, and returns a
+contract-valid bilingual clarification with an `internal_error` flag. It
+exposes only the exception type, not the exception message; tests set
+`ENGINE_STRICT=1` to re-raise failures and keep regressions visible. Replies
+now include intent-specific next steps in both languages and vary those steps
+deterministically by turn. Account and payment wording avoids requesting
+sensitive data, and replies do not imply that the assistant checked an order
+or completed a transaction.
+
 ### Worked example
 
 The new sentence “The modem arrived damaged, and I feel really disappointed.”
@@ -94,6 +106,20 @@ active. The reason reports state and message valence as -0.76. The reply
 apologizes for the problem with the item and offers to review its options.
 These are a single new unit-test-style example, not evaluation metrics.
 
+### Phase 5 worked example and validation
+
+The fresh sentence “The charging port on my camera is damaged, and I am really
+disappointed.” produced V=-0.764, A=-0.136, D=-0.246, confidence=0.661,
+label `sadness`, intent `DAMAGED_OR_DEFECTIVE`, and action `ANSWER_EMPATHIC`
+under `R6_EMPATHY`. It is a unit-test-style demonstration, not an evaluation
+message.
+
+The 40-message rehearsal covers eight new conversations, reaches all six
+actions, and passes 40/40. Fifteen additional English/Portuguese
+generalization cases pass 15/15. The full suite passes 87 tests; the eight
+mandatory/practice scenarios also pass from a clean copy. These checks do not
+reveal or score the 88 evaluation messages.
+
 ### Tests
 
 `tests/test_state.py` checks the confidence-weighted EMA, trend, streak,
@@ -101,31 +127,31 @@ repeated-issue detection, offer/decline/escalation memory, empathy hysteresis,
 and reset. `tests/test_policy.py` covers all six actions, the clarification
 cap, the human-offer cooldown and decline, deterministic reply variants,
 Portuguese and unsupported-language replies, and the rule that “thanks for
-nothing” does not close positively. `tests/test_scenarios.py` checks the
-scenario action expectations without changing the scenario files. A separate
-30-message rehearsal uses new messages and verifies action reachability;
-none of its sentence texts are in `messages.csv`.
+nothing” does not close positively. It also checks specific bilingual intent
+steps and consecutive reply variation. `tests/test_scenarios.py` checks the
+scenario action expectations without changing the scenario files. The
+40-message rehearsal in `tests/test_rehearsal.py` uses new messages, checks
+action reachability and a 90% minimum pass rate, and avoids `messages.csv`.
 
 ## How to change it
 
 - To make affect state react faster or more slowly, change `STATE_ALPHA` in
   `engine/config.py`; the EMA test derives its expected result from this
   setting.
-- To alter what counts as a repeated complaint or worsening trajectory,
-  adjust `NEG_TURN_V`, `REPEATED_ISSUE_MIN`, `STATE_TREND_WINDOW`, and
-  `TREND_WORSENING_THRESHOLD` in `engine/config.py`; the tracker tests cover
-  the resulting signals.
-- To make urgent handoff more or less cautious, review `ESC_V`, `ESC_A`,
-  `ESC_TURNS`, and `ESC_NEG_STREAK`. Tightening escalation can reduce false
-  alarms but miss distress; loosening it can over-escalate. Keep safety cues
-  ahead of ordinary conversational rules.
+- To alter repeated complaints, worsening trajectories, or urgent handoff,
+  review `NEG_TURN_V`, `REPEATED_ISSUE_MIN`, `STATE_TREND_WINDOW`,
+  `TREND_WORSENING_THRESHOLD`, `ESC_V`, `ESC_A`, `ESC_TURNS`, and
+  `ESC_NEG_STREAK` in `engine/config.py`; tightening escalation can reduce
+  false alarms but miss distress, while loosening it can over-escalate. Keep
+  safety cues ahead of ordinary conversational rules.
 - To adjust empathy entry and recovery, review `EMPATHY_V`, `EMPATHY_MSG_V`,
   `EMPATHY_A`, `EMPATHY_NEGATIVE_V`, and `EMPATHY_EXIT_V` in
   `engine/config.py`; preserve the hysteresis test when changing these values.
-- To change the clarification loop or the repeat-offer behavior, edit
+- To change the clarification loop or repeat-offer behavior, edit
   `MAX_CLARIFY`, `HUMAN_OFFER_COOLDOWN_TURNS`, or the corresponding named
-  rule in `engine/policy/policy.py`; retain the regression tests for caps and
-  declines.
+  rule in `engine/policy/policy.py`; retain the cap and decline regression
+  tests. For error handling, run with `ENGINE_STRICT=1` in tests so an
+  unexpected exception fails visibly instead of using the public fallback.
 - To change a reply, edit the corresponding action pattern or intent step in
   `engine/policy/replies.py`; preserve deterministic turn-based selection,
   the automated-assistant disclosure, and the no-unverified-promises rule.
@@ -141,8 +167,10 @@ none of its sentence texts are in `messages.csv`.
 3. **Why does the engine not close on every thank-you?** `R3_CLOSE` also
    checks positive valence and rejects `possible_sarcasm`; “thanks for
    nothing” is a regression case.
-4. **What prevents endless clarification?** `R4_UNCERTAIN` counts preceding
-   clarification actions and offers a person when `MAX_CLARIFY` is reached.
+4. **What prevents endless clarification, and how are internal errors handled?**
+   `R4_UNCERTAIN` offers a person at `MAX_CLARIFY`; the public engine boundary
+   returns a contract-valid clarification on unexpected errors, while
+   `ENGINE_STRICT=1` makes tests re-raise the error.
 5. **How is empathy prevented from switching abruptly?** The tracker uses
    separate entry and exit conditions, with `EMPATHY_EXIT_V` as the recovery
    threshold.
@@ -159,3 +187,7 @@ none of its sentence texts are in `messages.csv`.
    because the persistent-issue example can offer a person again on the next
    turn. Restore `2`; the failure demonstrates why cooldown behavior is
    tested.
+3. Edit one intent-specific English or Portuguese step in
+   `engine/policy/replies.py`, then run `py -3.12 -m unittest discover -s tests
+   -p 'test_policy.py'` to verify the reply remains specific, safe, and
+   deterministic.

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import re
 
 from .. import config
+from .text_matching import contains_any
 
 
 @dataclass
@@ -113,10 +114,6 @@ def adjust_contributions(tokens, hits, language, clause_weight):
     return contributions, sorted(flags)
 
 
-def _contains_any(text, phrases):
-    return any(re.search(r"(?<!\w)%s(?!\w)" % re.escape(item), text) for item in phrases)
-
-
 def domain_adjustments(text, words):
     """Return message-level VAD adjustments and flags from support-domain cues."""
     normalized = text.lower()
@@ -126,14 +123,14 @@ def domain_adjustments(text, words):
     dominance = 0.0
     flags = set()
 
-    negative_event = _contains_any(normalized, config.DOMAIN_NEGATIVE_TERMS)
+    negative_event = contains_any(normalized, config.DOMAIN_NEGATIVE_TERMS)
     if negative_event:
         valence += config.DOMAIN_PROBLEM_VALENCE
         flags.add("negative_event")
     issue_context = negative_event or bool(
         word_set.intersection(("wait", "waiting", "pending", "refund", "order", "broken"))
     )
-    repeated = _contains_any(normalized, config.REPETITION_CUES) or (
+    repeated = contains_any(normalized, config.REPETITION_CUES) or (
         "still" in word_set and issue_context
     )
     if repeated and issue_context:
@@ -141,26 +138,26 @@ def domain_adjustments(text, words):
         activity += config.REPETITION_ACTIVITY
         flags.add("repeated_issue")
 
-    if _contains_any(normalized, config.URGENCY_CUES):
+    if contains_any(normalized, config.URGENCY_CUES):
         activity += config.URGENCY_ACTIVITY
         dominance += config.URGENCY_DOMINANCE
 
-    if _contains_any(normalized, config.DEMAND_CUES):
+    if contains_any(normalized, config.DEMAND_CUES):
         dominance += config.DEMAND_DOMINANCE
 
-    if _contains_any(normalized, config.HELPLESSNESS_CUES):
+    if contains_any(normalized, config.HELPLESSNESS_CUES):
         dominance += config.HELPLESSNESS_DOMINANCE
 
-    if _contains_any(normalized, config.PROFANITY_TERMS):
+    if contains_any(normalized, config.PROFANITY_TERMS):
         valence += config.PROFANITY_VALENCE
         activity += config.PROFANITY_ACTIVITY
         flags.add("profanity")
 
-    if _contains_any(normalized, config.HUMAN_REQUEST_CUES):
+    if contains_any(normalized, config.HUMAN_REQUEST_CUES):
         flags.add("human_request")
-    if _contains_any(normalized, config.ESCALATION_CUES):
+    if contains_any(normalized, config.ESCALATION_CUES):
         flags.add("escalation_cue")
-    if _contains_any(normalized, config.SAFETY_CUES):
+    if contains_any(normalized, config.SAFETY_CUES):
         flags.add("safety")
 
     return valence, activity, dominance, sorted(flags)

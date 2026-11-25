@@ -2,14 +2,7 @@
 import re
 
 from .. import config
-
-
-def _contains_any(text, phrases):
-    normalized = str(text).casefold()
-    return any(
-        re.search(r"(?<!\w)%s(?!\w)" % re.escape(phrase), normalized)
-        for phrase in phrases
-    )
+from ..perception.text_matching import contains_any
 
 
 def _word_count(text):
@@ -44,8 +37,8 @@ def _safety(context):
 
 def _human_request(context):
     state = context["state"]
-    if state["human_declined"] and _contains_any(
-        context["text"], config.HUMAN_DECLINED_CUES
+    if state["human_declined"] and contains_any(
+        context["text"].casefold(), config.HUMAN_DECLINED_CUES
     ):
         return None
     if not (
@@ -169,7 +162,9 @@ def _uncertain(context):
         context["estimate"].intent == "UNKNOWN"
         and (
             "short_message" in context["flags"]
-            or _contains_any(context["text"], config.AMBIGUOUS_CUES)
+            or contains_any(
+                context["text"].casefold(), config.AMBIGUOUS_CUES
+            )
         )
     )
     if short_ambiguous:
@@ -267,7 +262,7 @@ RULES = (
 def choose_action(estimate, state, text):
     """Return the first action selected by the ordered named rule list."""
     flags = set(estimate.flags) | set(state["flags"])
-    abuse = _contains_any(text, config.ABUSE_CUES)
+    abuse = contains_any(str(text).casefold(), config.ABUSE_CUES)
     if abuse:
         flags.add("abuse")
     context = {

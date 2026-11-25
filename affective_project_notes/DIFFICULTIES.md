@@ -132,3 +132,19 @@
   made one sentence appear unsupported. Re-ran the check with Unicode escapes
   in the probe source; all 15 fresh English/Portuguese cases and four short
   Latin clarification cases passed. No project code change was needed.
+
+## Phase 5 - robustness and reply quality
+
+- The first 5,000-word latency probe took about 214 ms, above the 100-ms
+  target. Profiling found repeated whole-message cue searches and a full scan
+  of every phrase for each token. Added cached whole-word phrase matching and
+  indexed phrase candidates by their first token; five fresh-engine runs then
+  measured a 40.7-ms median and 42.6-ms maximum. The budget is a local test
+  target, not a cross-hardware performance guarantee.
+- The first fresh language-generalization set passed 14/15 because one
+  English payment sentence had too little English evidence. Reworded that
+  test sentence with clear English context; all 15 fresh English/Portuguese
+  cases then passed without changing the engine.
+- No evaluation-message output was used for debugging or displayed. The
+  robustness and rehearsal sentences are new and remain separate from
+  `messages.csv`.

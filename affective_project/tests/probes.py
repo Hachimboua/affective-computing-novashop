@@ -1,0 +1,87 @@
+"""Inputs for robustness checks; all messages are processed outside evaluation."""
+
+PROBE_CASES = (
+    ("empty", "", {}),
+    ("whitespace", "   ", {}),
+    ("question_mark", "???", {}),
+    ("okay", "okay?", {}),
+    ("single_letter", "k", {}),
+    ("fine", "fine.", {}),
+    ("hesitation", "hmm", {}),
+    ("ellipsis", "...", {}),
+    ("exclamation", "!!!", {}),
+    ("gibberish", "asdfgh", {}),
+    ("emoji", "😡😡😡", {}),
+    ("emoticon", ":)", {}),
+    ("uppercase_no", "NO", {}),
+    ("yes", "yes", {}),
+    ("help", "help", {}),
+    ("uppercase_order_question", "WHERE IS MY ORDER", {}),
+    ("order_question", "where is my order", {}),
+    ("human_request", "I want to talk to a real person", {}),
+    ("manager_request", "Get me your manager NOW", {}),
+    ("legal_threat", "I'm going to report you to consumer protection", {}),
+    ("resolved_thanks", "Thanks, that solved it!", {}),
+    ("sarcastic_thanks", "thanks for nothing", {}),
+    ("sarcastic_delay", "Oh great, another delay. Just perfect.", {}),
+    ("quoted_delivery", "Wow, 3 weeks for a 'fast' delivery", {}),
+    ("negated_complaint", "not bad actually", {}),
+    ("double_negation", "I'm not unhappy", {}),
+    (
+        "negated_delivery",
+        "It's not that the laptop is bad, it's that it never arrived",
+        {},
+    ),
+    (
+        "mixed_product_feedback",
+        "The headphones are great but the battery dies in an hour",
+        {},
+    ),
+    ("sarcastic_email", "I love how you never answer emails", {}),
+    ("digits", "123456", {}),
+    ("mixed_language", "the pedido never arrived", {}),
+    ("portuguese_complaint", "A cobrança continua errada e estou frustrado.", {}),
+    ("portuguese_thanks", "Muito obrigado, a solução foi excelente.", {}),
+    ("russian", "Пожалуйста, проверьте мою заявку.", {}),
+    ("chinese", "请帮我查询订单。", {}),
+    ("arabic", "أين طلبي؟", {}),
+    ("markup", "<script>alert(1)</script>", {}),
+    (
+        "line_breaks",
+        "Hello\n\nmy package is late.\n\nPlease tell me what to do.",
+        {},
+    ),
+    ("long_message", "the package " * 2500, {}),
+    ("none", None, {}),
+    ("integer", 42, {}),
+    (
+        "missing_audio",
+        "Could you help me with this delivery question?",
+        {"audio_path": r"C:\__novashop_missing_audio_probe__.wav"},
+    ),
+    (
+        "missing_image",
+        "The parcel arrived with a damaged corner.",
+        {"image_path": r"C:\__novashop_missing_image_probe__.png"},
+    ),
+)
+
+CONVERSATION_PROBES = (
+    (
+        "I am checking a delivery update.",
+        "The parcel is late again, and I still have no tracking change.",
+    ),
+    (
+        "A minha encomenda ainda está em trânsito.",
+        "Continua atrasada e não recebi nenhuma atualização.",
+    ),
+    (
+        "The account sign-in page keeps rejecting my details.",
+        "I have tried resetting the password, but I remain locked out.",
+        "This is becoming frustrating because I need the account today.",
+    ),
+    (
+        "O pagamento aparece no extrato do cartão.",
+        "A cobrança continua duplicada e não sei como a corrigir.",
+    ),
+)

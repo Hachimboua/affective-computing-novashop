@@ -1,14 +1,6 @@
 """Confidence-weighted conversation state and recent-turn signals."""
-import re
-
 from .. import config
-
-
-def _contains_any(text, phrases):
-    return any(
-        re.search(r"(?<!\w)%s(?!\w)" % re.escape(phrase), text)
-        for phrase in phrases
-    )
+from ..perception.text_matching import contains_any
 
 
 def _slope(values):
@@ -75,7 +67,7 @@ class StateTracker:
         prior_history = self.history[:]
         previous = prior_history[-1] if prior_history else None
         previous_action = previous["action"] if previous else None
-        current_resolved = _contains_any(normalized, config.RESOLUTION_CUES)
+        current_resolved = contains_any(normalized, config.RESOLUTION_CUES)
         if (
             estimate.intent == "CLOSING_THANKS"
             and estimate.valence >= config.CLOSE_V
@@ -91,7 +83,7 @@ class StateTracker:
         human_offered_turn = offers[-1] if offers else None
         if (
             human_offered_turn is not None
-            and _contains_any(normalized, config.HUMAN_DECLINED_CUES)
+            and contains_any(normalized, config.HUMAN_DECLINED_CUES)
         ):
             self.human_declined = True
 
@@ -175,7 +167,7 @@ class StateTracker:
         )
         acknowledgement_after_empathy = (
             previous_action == "ANSWER_EMPATHIC"
-            and _contains_any(normalized, config.ACKNOWLEDGMENT_CUES)
+            and contains_any(normalized, config.ACKNOWLEDGMENT_CUES)
         )
         return {
             "turn": self.turn_count,

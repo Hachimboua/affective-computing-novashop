@@ -36,6 +36,10 @@ Use only unit-test sentences for demonstrations:
    Portuguese and produces negative valence.
 4. `I love that for me.` is flagged as possible sarcasm and is estimated
    negatively.
+5. The fresh Phase 5 sentence “The charging port on my camera is damaged,
+   and I am really disappointed.” produced V=-0.764, A=-0.136, D=-0.246,
+   confidence=0.661, label `sadness`, intent `DAMAGED_OR_DEFECTIVE`, and action
+   `ANSWER_EMPATHIC` under `R6_EMPATHY`.
 
 These are qualitative illustrations from focused unit tests, not evaluation
 set results. Runtime VAD values come from the supplied tier table. Per-term
@@ -46,12 +50,27 @@ probability. Sarcasm, language identification, and domain rules can fail on
 out-of-vocabulary or mixed-context text. Terse or domain-heavy English with no
 recognized stopwords or lexicon entries may still be flagged as unsupported.
 
+### Phase 5 robustness and performance
+
+`tests/probes.py` supplies short, malformed, long, unsupported-language, and
+absent-media-path probes. `Engine.process()` returns a contract-valid
+clarification with `internal_error` if an unexpected exception escapes the
+pipeline; `ENGINE_STRICT=1` re-raises it in tests. The phrase matcher in
+`perception/text_matching.py` caches whole-word cue patterns,
+`lexicon.match_clause()` checks phrases indexed by their first token, and
+`detect_intent()` scans combined cues rather than rescanning the whole message
+for every phrase. On Python 3.12, a 5,000-word message took a median 40.7 ms
+and a maximum 42.6 ms over five fresh-engine runs, below the configured
+100-ms test budget. This is a local benchmark, not a guarantee for slower
+hardware.
+
 ## How to change it
 
 - Adjust shared thresholds and trade-offs in
   `affective_project/engine/config.py`.
 - Change normalization, matching, rules, language, sarcasm, or intents in the
-  corresponding `engine/perception/` module.
+  corresponding `engine/perception/` module. Preserve whole-word boundaries
+  in `text_matching.py`; the long-input probe protects the matching path.
 - Add focused tests in `affective_project/tests/test_perception.py`, using
   fresh unit-test sentences rather than evaluation messages.
 - Review tier choices in `../lexicon_review_sheet.csv`, fill `my tier` where
@@ -78,6 +97,9 @@ complete. At this checkpoint, report scenario verification as pass/fail only.
 4. **What remains for later phases?** Affective-state mapping refinement,
    conversation state, action policy, tailored replies, and optional channels
    remain outside this text-perception phase.
+5. **How is a Latin-script language identified?** `language.py` combines
+   distinctive stopwords with supported word- and phrase-lexicon evidence,
+   then gives foreign stopwords priority when their evidence is stronger.
 
 ## Live-change drills
 
@@ -87,3 +109,7 @@ complete. At this checkpoint, report scenario verification as pass/fail only.
 2. Change a tier suggestion in the review sheet, sync it to the TSVs, and test
    a new non-evaluation sentence that contains it. Do not infer performance
    on the held-out evaluation conversations.
+3. Lower `TEXT_LATENCY_BUDGET_SECONDS` in `engine/config.py` temporarily and
+   run `py -3.12 -m unittest discover -s tests -p test_robustness.py` to see
+   the long-message performance assertion tighten; restore the configured
+   value afterward.

@@ -2,13 +2,10 @@
 import re
 
 from .. import config
+from .text_matching import contains_any
 
 
 _RESOLUTION_CUES = frozenset(("resolved", "fixed", "solved", "resolvido", "resolvida"))
-
-
-def _contains_phrase(text, phrase):
-    return re.search(r"(?<!\w)%s(?!\w)" % re.escape(phrase), text) is not None
 
 
 def score_sarcasm(text, contributions, language, context_valence=0.0):
@@ -19,17 +16,17 @@ def score_sarcasm(text, contributions, language, context_valence=0.0):
     if language == "mixed":
         idioms.update(config.SARCASM_IDIOMS["en"])
         idioms.update(config.SARCASM_IDIOMS["pt"])
-    if any(_contains_phrase(normalized, idiom) for idiom in idioms):
+    if contains_any(normalized, idioms):
         score = max(score, config.SARCASM_IDIOM_SCORE)
 
     positive = any(
         item.valence > config.SARCASM_POSITIVE_MIN for item in contributions
     )
-    negative_event = any(
-        _contains_phrase(normalized, term)
-        for term in (
+    negative_event = contains_any(
+        normalized,
+        (
             config.SARCASM_NEGATIVE_EVENT_TERMS | config.SARCASM_REPETITION_CUES
-        )
+        ),
     )
     if positive and negative_event:
         score = max(score, config.SARCASM_INCONGRUITY_SCORE)

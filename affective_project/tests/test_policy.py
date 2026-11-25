@@ -335,6 +335,136 @@ class PolicyTests(unittest.TestCase):
         self.assertIn("your laptop", result["reply"])
         self.assertNotIn("this item for your laptop", result["reply"])
 
+    def test_supported_intents_get_specific_safe_next_steps(self):
+        examples = (
+            (
+                "en",
+                "Could you help me locate the current status for my order?",
+                "ORDER_STATUS",
+                ("order number", "tracking update"),
+            ),
+            (
+                "pt",
+                "Pode ajudar-me a verificar o estado do pedido?",
+                "ORDER_STATUS",
+                ("número da encomenda", "rastreio"),
+            ),
+            (
+                "en",
+                "My parcel is delayed, and the tracking page has not changed.",
+                "DELIVERY_DELAY",
+                ("order number", "tracking update"),
+            ),
+            (
+                "pt",
+                "A minha encomenda continua atrasada.",
+                "DELIVERY_DELAY",
+                ("número da encomenda", "rastreio"),
+            ),
+            (
+                "en",
+                "The display on my phone is cracked and unusable.",
+                "DAMAGED_OR_DEFECTIVE",
+                ("describe the issue", "order number"),
+            ),
+            (
+                "pt",
+                "O ecrã do meu telemóvel está partido.",
+                "DAMAGED_OR_DEFECTIVE",
+                ("descreva o problema", "número da encomenda"),
+            ),
+            (
+                "en",
+                "The box contains the wrong item, not the headphones I ordered.",
+                "WRONG_ITEM",
+                ("what you ordered", "order number"),
+            ),
+            (
+                "pt",
+                "Recebi um produto errado, não o carregador que pedi.",
+                "WRONG_ITEM",
+                ("o que pediu", "número da encomenda"),
+            ),
+            (
+                "en",
+                "I need to return this item and ask about a refund.",
+                "REFUND_RETURN",
+                ("return or refund", "order number"),
+            ),
+            (
+                "pt",
+                "Quero pedir um reembolso e saber como iniciar a devolução.",
+                "REFUND_RETURN",
+                ("reembolso", "número da encomenda"),
+            ),
+            (
+                "en",
+                "A card payment appears twice on my statement.",
+                "PAYMENT_BILLING",
+                ("order number", "without sending card details"),
+            ),
+            (
+                "pt",
+                "Estou com um problema: o pagamento do meu cartão foi duplicado.",
+                "PAYMENT_BILLING",
+                ("número da encomenda", "sem enviar dados do cartão"),
+            ),
+            (
+                "en",
+                "My account locked after I entered the wrong password.",
+                "ACCOUNT_LOGIN",
+                ("sign-in error", "password"),
+            ),
+            (
+                "pt",
+                "A minha conta está bloqueada e não consigo iniciar sessão.",
+                "ACCOUNT_LOGIN",
+                ("erro de acesso", "palavra-passe"),
+            ),
+            (
+                "en",
+                "How does this travel speaker connect to Bluetooth?",
+                "PRODUCT_QUESTION",
+                ("product model", "feature"),
+            ),
+            (
+                "pt",
+                "Este carregador é compatível com tomadas USB-C?",
+                "PRODUCT_QUESTION",
+                ("modelo do produto", "característica"),
+            ),
+        )
+        self.assert_new_sentences(text for _, text, _, _ in examples)
+        unsupported_claims = (
+            "your order is on its way",
+            "will arrive tomorrow",
+            "your refund has been approved",
+            "a encomenda já foi enviada",
+            "chegará amanhã",
+            "o reembolso foi aprovado",
+        )
+        for language, text, expected_intent, next_steps in examples:
+            with self.subTest(language=language, intent=expected_intent):
+                result = Engine().process(text)
+                self.assertEqual(result["details"]["lang"], language)
+                self.assertEqual(result["details"]["intent"], expected_intent)
+                reply = result["reply"].casefold()
+                for phrase in next_steps:
+                    self.assertIn(phrase.casefold(), reply)
+                for claim in unsupported_claims:
+                    self.assertNotIn(claim, reply)
+
+    def test_repeated_intent_replies_do_not_repeat_consecutive_steps(self):
+        engine = Engine()
+        replies = [
+            engine.process(
+                "How does the portable speaker pair with Bluetooth?"
+            )["reply"]
+            for _ in range(4)
+        ]
+        for previous, current in zip(replies, replies[1:]):
+            self.assertNotEqual(previous, current)
+
     def test_reply_variants_are_deterministic(self):
         engine = Engine()
         first = engine.process("What is the warranty coverage?")

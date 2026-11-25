@@ -3,6 +3,7 @@ import unicodedata
 
 from .. import config
 from .lexicon import load_lexicons
+from .text_matching import matching_phrases
 
 
 SUPPORTED_LANGUAGES = ("en", "pt")
@@ -176,14 +177,6 @@ def _word_sequences(tokens):
     return sequences
 
 
-def _contains_sequence(sequence, phrase):
-    size = len(phrase)
-    return any(
-        sequence[index : index + size] == phrase
-        for index in range(len(sequence) - size + 1)
-    )
-
-
 def _lexicon_scores(tokens, words):
     lexicons = load_lexicons()
     scores = {"en": 0, "pt": 0}
@@ -202,15 +195,18 @@ def _lexicon_scores(tokens, words):
     for language in SUPPORTED_LANGUAGES:
         other_language = "pt" if language == "en" else "en"
         other_phrases = lexicons.phrases[other_language]
-        for phrase in lexicons.phrases[language]:
-            if phrase in other_phrases:
-                continue
-            phrase_words = phrase.split()
-            if any(
-                _contains_sequence(sequence, phrase_words)
-                for sequence in phrase_sequences
-            ):
-                scores[language] += 1
+        distinctive_phrases = (
+            phrase
+            for phrase in lexicons.phrases[language]
+            if phrase not in other_phrases
+        )
+        distinctive_phrases = tuple(distinctive_phrases)
+        matched_phrases = set()
+        for sequence in phrase_sequences:
+            matched_phrases.update(
+                matching_phrases(" ".join(sequence), distinctive_phrases)
+            )
+        scores[language] += len(matched_phrases)
     return scores
 
 

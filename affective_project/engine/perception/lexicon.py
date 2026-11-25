@@ -155,19 +155,34 @@ def match_clause(clause, language, lexicons=None):
     ]
     hits = []
     languages = _language_choices(language)
+    phrase_candidates = {}
+    for candidate_language in languages:
+        for term, entry in lexicons.phrases[candidate_language].items():
+            phrase_tokens = tuple(term.split())
+            phrase_candidates.setdefault(phrase_tokens[0], []).append(
+                (phrase_tokens, entry, candidate_language)
+            )
+    for candidates in phrase_candidates.values():
+        candidates.sort(key=lambda candidate: -len(candidate[0]))
+
     index = 0
     while index < len(tokens):
         token = tokens[index]
         phrase_match = None
-        for candidate_language in languages:
-            for term, entry in lexicons.phrases[candidate_language].items():
-                phrase_tokens = term.split()
-                end = index + len(phrase_tokens)
-                if end <= len(tokens) and [
-                    item.normalized for item in tokens[index:end]
-                ] == phrase_tokens:
-                    if phrase_match is None or len(phrase_tokens) > phrase_match[0]:
-                        phrase_match = (len(phrase_tokens), entry, candidate_language)
+        for phrase_tokens, entry, candidate_language in phrase_candidates.get(
+            token.normalized, ()
+        ):
+            end = index + len(phrase_tokens)
+            if end <= len(tokens) and all(
+                tokens[index + offset].normalized == word
+                for offset, word in enumerate(phrase_tokens)
+            ):
+                phrase_match = (
+                    len(phrase_tokens),
+                    entry,
+                    candidate_language,
+                )
+                break
         if phrase_match is not None:
             length, entry, candidate_language = phrase_match
             hits.append(LexicalHit(entry, index, index + length, candidate_language))

@@ -26,8 +26,8 @@
 
 | Phase | Status | Commit |
 |---|---|---|
-| 5 — robustness and reply quality | In progress | — |
-| 6 — integration and documentation | Not started | — |
+| 5 — robustness and reply quality | Done | — |
+| 6 — integration and documentation | In progress | — |
 | 7 — voice channel | Not started; gated on Phase 6 | — |
 | 8 — face channel | Skipped as directed | — |
 | 9 — evaluation pipeline | Not started; no real ratings available | — |
@@ -40,3 +40,16 @@
 The evaluation messages remain unavailable for tuning and per-message output.
 Real SAM ratings, teacher answers, the group identifier, and the delivery
 deadline remain outstanding.
+
+### Phase 5 gate
+
+- Python 3.12: 87 tests passed.
+- Mandatory and practice scenarios: 8/8 passed with generated logs removed.
+- Protected kit verification: zero mismatches across 29 files.
+- Clean-copy simulation: 87 tests and 8/8 scenarios passed.
+- Fresh English/Portuguese generalization: 15/15 passed; the 40-message
+  rehearsal passed 40/40 across eight conversations and reached all six
+  actions.
+- The 5,000-word local benchmark measured a 40.7-ms median and 42.6-ms
+  maximum across five fresh-engine runs, below the 100-ms test budget.
+- No engine output for the 88 evaluation messages was generated or displayed.

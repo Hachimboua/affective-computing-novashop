@@ -155,3 +155,19 @@
   probes passed 15/15 plus 4/4. Python 3.9 is unavailable in this environment.
 - **What I changed:**
 - **How I verified it:**
+
+## 2026-11-25 - Phase 5 - robustness and reply quality
+
+- **What I asked for:** Harden engine error handling, improve bilingual
+  intent-specific replies, optimize long-message processing, and verify
+  robustness and action reachability using only new sentences. Keep the 88
+  evaluation-message outputs hidden.
+- **What the AI produced:** Added the contract-valid internal-error fallback
+  and strict test mode, shared cached phrase matching, optimized intent and
+  lexicon phrase scans, focused robustness and reply-quality regressions, and
+  a 40-message rehearsal across eight conversations. Added Phase 5 guidance
+  and the measured new-message example to Topics 1 and 3. Five 5,000-word
+  runs measured a 40.7-ms median and 42.6-ms maximum; the rehearsal passed
+  40/40 and fresh language generalization passed 15/15.
+- **What I changed:**
+- **How I verified it:**
