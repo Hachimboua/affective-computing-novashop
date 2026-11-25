@@ -96,13 +96,14 @@ def _has_mixed_clauses(clause_values):
     return positive and negative
 
 
-def _confidence(processed, language, language_confidence, intent, contributions, flags):
+def _confidence(processed, language, language_confidence, contributions, flags):
     """Compute a heuristic confidence score; it is not a calibrated probability.
 
     Ordinarily, C = (1 - exp(-rate * N)) * L, where N is the contribution
-    count and L is language confidence. Recognized neutral intent instead
-    starts at neutral_confidence * L. With contributions, multiply by
-    (1 - agreement_penalty * disagreement) and
+    count and L is language confidence. A supported-language message with
+    enough words but no affect contributions starts at neutral_confidence * L,
+    even when its support intent is not recognized. With contributions,
+    multiply by (1 - agreement_penalty * disagreement) and
     max(unknown_floor, 1 - unknown_penalty * unknown_ratio). Then apply the
     short-text, mixed-language, and sarcasm factors; cap unsupported language
     and clamp C to the configured range.
@@ -112,7 +113,6 @@ def _confidence(processed, language, language_confidence, intent, contributions,
     if (
         not contributions
         and len(words) >= config.NEUTRAL_INTENT_MIN_TOKENS
-        and intent != "UNKNOWN"
         and supported
     ):
         confidence = config.NEUTRAL_CONFIDENCE * language_confidence
@@ -256,7 +256,7 @@ def estimate_text(text, context_valence=0.0):
     dominance = _soft_squash(raw_dominance)
     flags = set(processed.flags) | set(language_flags) | rule_flags
     confidence = _confidence(
-        processed, language, language_confidence, intent, all_contributions, flags
+        processed, language, language_confidence, all_contributions, flags
     )
     if confidence < config.LOW_CONFIDENCE_THRESHOLD:
         flags.add("low_confidence")

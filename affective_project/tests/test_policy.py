@@ -3,6 +3,7 @@ import csv
 from pathlib import Path
 import unittest
 
+from engine import config
 from engine.engine import Engine
 
 
@@ -86,6 +87,60 @@ class PolicyTests(unittest.TestCase):
                 "ESCALATE",
                 "CLOSE_POSITIVE",
             },
+        )
+
+    def test_plain_neutral_questions_get_neutral_confidence_and_answer(self):
+        examples = (
+            ("Do you ship to the Azores?", "en"),
+            ("Can I pay with PayPal?", "en"),
+            ("What time do you close on Sundays?", "en"),
+            ("Posso pagar com MB Way?", "pt"),
+            ("Têm loja física no Porto?", "pt"),
+        )
+        messages_path = (
+            Path(__file__).resolve().parent.parent
+            / "engine"
+            / "evaluation"
+            / "data"
+            / "messages.csv"
+        )
+        with messages_path.open("r", encoding="utf-8", newline="") as stream:
+            evaluation_texts = {row["text"] for row in csv.DictReader(stream)}
+        self.assertFalse(
+            evaluation_texts.intersection(text for text, _ in examples)
+        )
+
+        for text, expected_language in examples:
+            with self.subTest(text=text):
+                result = Engine().process(text)
+                self.assertEqual(result["details"]["lang"], expected_language)
+                self.assertEqual(result["details"]["intent"], "UNKNOWN")
+                self.assertEqual(result["action"], "ANSWER")
+                self.assertEqual(result["label"], "neutral")
+                self.assertIn("no_affect_words", result["flags"])
+                self.assertNotIn("unsupported_language", result["flags"])
+                self.assertAlmostEqual(
+                    result["confidence"],
+                    config.NEUTRAL_CONFIDENCE
+                    * result["details"]["lang_confidence"],
+                )
+                invitation = (
+                    "número da encomenda"
+                    if expected_language == "pt"
+                    else "order number"
+                )
+                self.assertIn(invitation, result["reply"].casefold())
+
+        boundary_question = "Where is it?"
+        self.assertNotIn(boundary_question, evaluation_texts)
+        boundary_result = Engine().process(boundary_question)
+        self.assertEqual(boundary_result["details"]["lang"], "en")
+        self.assertEqual(boundary_result["details"]["intent"], "UNKNOWN")
+        self.assertIn("no_affect_words", boundary_result["flags"])
+        self.assertAlmostEqual(
+            boundary_result["confidence"],
+            config.NEUTRAL_CONFIDENCE
+            * boundary_result["details"]["lang_confidence"],
         )
 
     def test_explicit_legal_cue_overrides_positive_closing_language(self):

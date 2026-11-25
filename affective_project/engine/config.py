@@ -275,7 +275,19 @@ HUMAN_DECLINED_CUES = frozenset(
         "não é necessário",
     )
 )
-AMBIGUOUS_CUES = frozenset(("ok", "okay", "whatever", "?", "hmm"))
+AMBIGUOUS_CUES = frozenset(
+    (
+        "ok",
+        "okay",
+        "whatever",
+        "?",
+        "hmm",
+        "cannot follow",
+        "clearer",
+        "more context",
+        "unsure",
+    )
+)
 ACKNOWLEDGMENT_CUES = frozenset(("ok", "okay", "thanks", "thank you", "obrigado", "obrigada"))
 RESOLUTION_CUES = frozenset(
     (
@@ -352,9 +364,10 @@ LANG_PORTUGUESE_HINT_CONFIDENCE = 0.60  # Raising it trusts unique Portuguese te
 LANG_MIXED_CONFIDENCE = 0.50  # Raising it trusts mixed-language cues more; lowering it favors clarification.
 LANG_LEXICON_EVIDENCE_FLOOR = 0.65  # Raising it trusts a matched supported-language term more; lowering it preserves language uncertainty.
 UNKNOWN_WORD_CONFIDENCE_FLOOR = 0.50  # Raising it limits the unknown-word penalty; lowering it penalizes unfamiliar text more.
-NEUTRAL_INTENT_MIN_TOKENS = 4  # Raising it requires more context for neutral intent; lowering it trusts shorter messages.
+NEUTRAL_INTENT_MIN_TOKENS = 3  # Raising it requires more context for neutral evidence; lowering it trusts shorter text.
 SARCASM_IDIOM_SCORE = 0.95  # Raising it makes idioms more decisive; lowering it treats idioms as weaker evidence.
 SARCASM_INCONGRUITY_SCORE = 0.72  # Raising it requires stronger context-word mismatch; lowering it catches more possible sarcasm.
 SARCASM_QUOTED_SCORE = 0.65  # Raising it trusts quotation as sarcasm evidence less; lowering it catches more quoted irony.
 SARCASM_CONTEXT_SCORE = 0.55  # Raising it relies more on conversation context; lowering it requires stronger direct cues.
 EMPATHY_NEGATIVE_V = 0.0  # Lowering requires stronger negativity; raising empathizes at weaker negative valence.
+POSITIVE_FEEDBACK_V = 0.60  # Raising it requires stronger positive evidence to skip clarification; lowering answers more uncertain praise.

@@ -111,6 +111,7 @@ def _positive_close(context):
 
 def _uncertain(context):
     state = context["state"]
+    estimate = context["estimate"]
     if state["clar_streak"] >= config.MAX_CLARIFY:
         return (
             "OFFER_HUMAN",
@@ -128,15 +129,20 @@ def _uncertain(context):
                 context["estimate"].confidence,
             ),
         )
+    clear_positive_feedback = (
+        estimate.intent == "UNKNOWN"
+        and estimate.valence >= config.POSITIVE_FEEDBACK_V
+    )
     if (
-        context["estimate"].confidence < config.CLARIFY_CONF
+        estimate.confidence < config.CLARIFY_CONF
         and not state["empathy_active"]
-        and context["estimate"].valence > config.EMPATHY_MSG_V
+        and estimate.valence > config.EMPATHY_MSG_V
+        and not clear_positive_feedback
     ):
         return (
             "ASK_CLARIFICATION",
             "confidence %.2f is below clarification threshold %.2f"
-            % (context["estimate"].confidence, config.CLARIFY_CONF),
+            % (estimate.confidence, config.CLARIFY_CONF),
         )
     short_ambiguous = (
         context["estimate"].intent == "UNKNOWN"

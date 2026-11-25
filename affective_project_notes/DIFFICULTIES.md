@@ -81,10 +81,12 @@
   the decline sentence also contains a human-reference word. Added a
   decline-aware guard and a regression test so the assistant neither repeats
   the offer nor escalates that decline as a new request.
-- The Phase 3 contract regression expected a normal answer for a message whose
-  affect estimate was below the Phase 4 clarification-confidence threshold.
-  Updated the expected action to `ASK_CLARIFICATION` under `R4_UNCERTAIN`, and
-  kept the reset-determinism assertion intact.
+- The Phase 3 contract regression was temporarily changed to expect
+  `ASK_CLARIFICATION` instead of fixing the confidence-policy interaction.
+  Part A2 restores the original `ANSWER` contract for clear positive feedback,
+  gives supported 3+ word messages without affective evidence neutral-evidence
+  confidence, and preserves clarification for explicit ambiguity cues. Unknown
+  neutral questions now receive a helpful response requesting relevant details.
 
 ## Part A1 - protected kit byte identity
 

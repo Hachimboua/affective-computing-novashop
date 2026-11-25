@@ -618,8 +618,7 @@ class TextEstimateTests(unittest.TestCase):
             first["label"],
             {"neutral", "calm", "joy", "anger", "frustration", "fear", "sadness"},
         )
-        self.assertEqual(first["action"], "ASK_CLARIFICATION")
-        self.assertEqual(first["details"]["rule"], "R4_UNCERTAIN")
+        self.assertEqual(first["action"], "ANSWER")
 
 
 if __name__ == "__main__":

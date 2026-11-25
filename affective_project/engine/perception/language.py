@@ -129,6 +129,10 @@ PORTUGUESE_HINTS = frozenset(
         "ficou",
         "apoio",
         "pagamento",
+        "posso",
+        "têm",
+        "loja",
+        "física",
     )
 )
 SCRIPT_LANGUAGE = {

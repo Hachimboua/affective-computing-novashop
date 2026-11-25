@@ -185,12 +185,22 @@ def render_reply(action, intent, language, turn_index, entities=None, flags=None
         step = _PT_STEPS.get(intent, _PT_STEPS["UNKNOWN"]).format(
             subject=subject
         )
+        if intent == "UNKNOWN" and "no_affect_words" in flags:
+            step = (
+                "Diga-me um pouco mais sobre a sua questão. Se for sobre uma "
+                "encomenda, indique o número da encomenda."
+            )
         problem = _problem(intent, entities, language)
         pattern = _variant(_PT_ACTION_PATTERNS[action], turn_index)
     else:
         step = _EN_STEPS.get(intent, _EN_STEPS["UNKNOWN"]).format(
             subject=subject
         )
+        if intent == "UNKNOWN" and "no_affect_words" in flags:
+            step = (
+                "Tell me a little more about your question. If it concerns an "
+                "order, please include the order number."
+            )
         problem = _problem(intent, entities, language)
         pattern = _variant(_EN_ACTION_PATTERNS[action], turn_index)
     return pattern.format(step=step, problem=problem)
