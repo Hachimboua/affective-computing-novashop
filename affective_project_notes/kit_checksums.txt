@@ -1,0 +1,19 @@
+Phase 0 baseline checksums (SHA-256)
+Tree digest algorithm: sort regular files by relative POSIX path, omit __pycache__ and *.pyc/*.pyo, then hash UTF-8 lines:
+relative/path<TAB>sha256(file bytes)<LF>
+
+harness/ TREE_SHA256 968afd3b5d9d683bb561d489255ddd284352abf285b8d94a15805986f401c1a3 (8 files)
+run_app.py SHA256 0f0fe8fb939a76fe8294f08f1c32ad15b6f3dd9e4d29072975926e64b91ac584
+run_scenario.py SHA256 0c931063f45157b02174b3b3db192d18f23c474733da920ca3545e4868a12f9d
+scenarios/ TREE_SHA256 0635cf321f9218e6dc77a90e13ea106ea98b69be9fcaadb3c9653be8b5096e87 (8 files)
+tests/test_contract.py SHA256 d7dbc68bd337f59f26f397ea609989e0a13ae27a4053e184ae4aca1a54f00a47
+
+Starter engine copy:
+evaluation/baselines/starter_engine/engine.py
+SHA256 fb1ca1d75f1506c3ef59097d3b0a70d84f0b327b68620e0c3b0b4d9eb9459ade
+
+Baseline environment:
+Python 3.14.6
+Contract test: passed
+Mandatory scenario runners: M1-M4 passed
+Practice scenario runners: P1-P4 passed

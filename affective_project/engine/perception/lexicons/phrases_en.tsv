@@ -1,0 +1,34 @@
+term	tier	v_override	a_override	d_override
+still not arrived	PROBLEM			
+waste of money	PROBLEM			
+money back	POSITIVE			
+thank you so much	CONTENT			
+no worries	CONTENT			
+for the third time	FRUSTRATION			
+real person	NEUTRAL			
+talk to a human	NEUTRAL			
+thanks for nothing	ANGER			
+not happy at all	SADNESS			
+not working	PROBLEM			
+does not work	PROBLEM			
+doesn't work	PROBLEM			
+what a surprise	FRUSTRATION			
+yeah right	FRUSTRATION			
+oh great	FRUSTRATION			
+just perfect	FRUSTRATION			
+never arrived	PROBLEM			
+a little worried	FEAR			
+all fixed	POSITIVE			
+works perfectly	POSITIVE			
+very disappointed	SADNESS			
+out of stock	PROBLEM_MILD			
+well done	POSITIVE			
+good job	POSITIVE			
+thanks a ton	CONTENT			
+thanks heaps	CONTENT			
+worked perfectly	POSITIVE			
+great customer service	POSITIVE			
+good news	JOY			
+arrived on time	POSITIVE			
+delivered quickly	POSITIVE			
+dead on arrival	PROBLEM			

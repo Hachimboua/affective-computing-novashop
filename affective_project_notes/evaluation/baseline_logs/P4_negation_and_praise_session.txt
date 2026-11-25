@@ -1,0 +1,43 @@
+AFFECTIVE COMPUTING PROJECT - SESSION LOG
+Session started : 2026-11-25 12:43:04
+Engine          : engine.engine.Engine
+Log file        : C:\Users\houci\Documents\AC project\Student_Kit_to_share_with_students\affective_project\logs\session_20261125_124304.txt
+This is a plain text file. Every message, the map values (x = valence, y = activity),
+the confidence and the chosen action are written below in order.
+------------------------------------------------------------------------
+[12:43:04] SCENARIO P4 - Negation and praise
+------------------------------------------------------------------------
+#1  12:43:04  source=scenario:P4
+INPUT      : The delivery was not bad.
+MAP (x,y)   : valence=-0.50  activity=+0.00  dominance=n/a
+CONFIDENCE : 0.30
+LABEL      : frustration
+ACTION     : ANSWER
+FLAGS      : -
+LATENCY    : 0 ms
+REPLY      : Thanks for your message. How can I help?
+DETAILS    : {'words': 5}
+------------------------------------------------------------------------
+#2  12:43:04  source=scenario:P4
+INPUT      : I am not happy at all with the packaging.
+MAP (x,y)   : valence=+0.00  activity=+0.00  dominance=n/a
+CONFIDENCE : 0.30
+LABEL      : neutral
+ACTION     : ANSWER
+FLAGS      : -
+LATENCY    : 0 ms
+REPLY      : Thanks for your message. How can I help?
+DETAILS    : {'words': 9}
+------------------------------------------------------------------------
+#3  12:43:04  source=scenario:P4
+INPUT      : Still, the support team was great, thank you.
+MAP (x,y)   : valence=+1.00  activity=+0.00  dominance=n/a
+CONFIDENCE : 0.30
+LABEL      : joy
+ACTION     : ANSWER
+FLAGS      : -
+LATENCY    : 0 ms
+REPLY      : Thanks for your message. How can I help?
+DETAILS    : {'words': 8}
+------------------------------------------------------------------------
+Session ended: 2026-11-25 12:43:04   messages: 3

@@ -1,0 +1,3 @@
+__pycache__/
+*.pyc
+affective_project/logs/session_*.txt

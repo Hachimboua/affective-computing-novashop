@@ -1,0 +1,43 @@
+AFFECTIVE COMPUTING PROJECT - SESSION LOG
+Session started : 2026-11-25 12:43:04
+Engine          : engine.engine.Engine
+Log file        : C:\Users\houci\Documents\AC project\Student_Kit_to_share_with_students\affective_project\logs\session_20261125_124304.txt
+This is a plain text file. Every message, the map values (x = valence, y = activity),
+the confidence and the chosen action are written below in order.
+------------------------------------------------------------------------
+[12:43:04] SCENARIO P2 - Disappointed and tired customer
+------------------------------------------------------------------------
+#1  12:43:04  source=scenario:P2
+INPUT      : I am really disappointed with my last order.
+MAP (x,y)   : valence=+0.00  activity=+0.00  dominance=n/a
+CONFIDENCE : 0.30
+LABEL      : neutral
+ACTION     : ANSWER
+FLAGS      : -
+LATENCY    : 0 ms
+REPLY      : Thanks for your message. How can I help?
+DETAILS    : {'words': 8}
+------------------------------------------------------------------------
+#2  12:43:04  source=scenario:P2
+INPUT      : I am tired of waiting for the replacement.
+MAP (x,y)   : valence=+0.00  activity=+0.00  dominance=n/a
+CONFIDENCE : 0.30
+LABEL      : neutral
+ACTION     : ANSWER
+FLAGS      : -
+LATENCY    : 0 ms
+REPLY      : Thanks for your message. How can I help?
+DETAILS    : {'words': 8}
+------------------------------------------------------------------------
+#3  12:43:04  source=scenario:P2
+INPUT      : I do not think it will ever arrive.
+MAP (x,y)   : valence=+0.00  activity=+0.00  dominance=n/a
+CONFIDENCE : 0.30
+LABEL      : neutral
+ACTION     : ANSWER
+FLAGS      : -
+LATENCY    : 0 ms
+REPLY      : Thanks for your message. How can I help?
+DETAILS    : {'words': 8}
+------------------------------------------------------------------------
+Session ended: 2026-11-25 12:43:04   messages: 3

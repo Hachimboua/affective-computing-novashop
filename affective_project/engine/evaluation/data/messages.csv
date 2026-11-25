@@ -1,0 +1,89 @@
+msg_id,conversation_id,turn,split,text,source,case_type
+M1-01,M1,1,dev,"Hi, how long does delivery usually take?",scenario,scenario_m1
+M1-02,M1,2,dev,Thanks. And can I change my delivery address?,scenario,scenario_m1
+M1-03,M1,3,dev,"Perfect, that is all I needed. Thank you!",scenario,scenario_m1
+M2-01,M2,1,dev,"Hi, my order 4821 has not arrived yet.",scenario,scenario_m2
+M2-02,M2,2,dev,It was supposed to be here three days ago.,scenario,scenario_m2
+M2-03,M2,3,dev,Nobody has answered my two emails. This is really frustrating.,scenario,scenario_m2
+M2-04,M2,4,dev,This is unacceptable! I want my money back!!,scenario,scenario_m2
+M2-05,M2,5,dev,I am furious. I will contact a lawyer if this is not solved today.,scenario,scenario_m2
+M3-01,M3,1,dev,Can you tell me how to return a product?,scenario,scenario_m3
+M3-02,M3,2,dev,"I do not want to talk to a bot, please connect me with a human agent.",scenario,scenario_m3
+M3-03,M3,3,dev,"Thank you, but if this is not fixed I will go to the consumer protection authority.",scenario,scenario_m3
+M4-01,M4,1,dev,ok,scenario,scenario_m4
+M4-02,M4,2,dev,"whatever, do what you want",scenario,scenario_m4
+M4-03,M4,3,dev,"Great, another delay. Really great.",scenario,scenario_m4
+M4-04,M4,4,dev,"It is not bad, thanks.",scenario,scenario_m4
+M4-05,M4,5,dev,"Obrigado, ficou tudo resolvido.",scenario,scenario_m4
+P1-01,P1,1,dev,"Hello, I would like to know how refunds work.",scenario,scenario_p1
+P1-02,P1,2,dev,"I bought a keyboard last week, can I return it?",scenario,scenario_p1
+P1-03,P1,3,dev,"Understood, thanks.",scenario,scenario_p1
+P2-01,P2,1,dev,I am really disappointed with my last order.,scenario,scenario_p2
+P2-02,P2,2,dev,I am tired of waiting for the replacement.,scenario,scenario_p2
+P2-03,P2,3,dev,I do not think it will ever arrive.,scenario,scenario_p2
+P3-01,P3,1,dev,I am worried my payment failed.,scenario,scenario_p3
+P3-02,P3,2,dev,I am scared the money is gone and the order disappeared!,scenario,scenario_p3
+P3-03,P3,3,dev,"Please help me, I do not know what to do.",scenario,scenario_p3
+P4-01,P4,1,dev,The delivery was not bad.,scenario,scenario_p4
+P4-02,P4,2,dev,I am not happy at all with the packaging.,scenario,scenario_p4
+P4-03,P4,3,dev,"Still, the support team was great, thank you.",scenario,scenario_p4
+AI-D01-01,AI-D01,1,dev,"Thanks, the replacement charger arrived today and works perfectly.",ai_draft,clear_positive
+AI-D01-02,AI-D01,2,dev,Your instructions made the setup easy.,ai_draft,clear_positive
+AI-D01-03,AI-D01,3,dev,That solves it; I really appreciate your help!,ai_draft,clear_positive
+AI-D02-01,AI-D02,1,dev,My headphones arrived broken and the left side does not work.,ai_draft,clear_negative
+AI-D02-02,AI-D02,2,dev,I already tried the reset; this is very frustrating.,ai_draft,clear_negative
+AI-D02-03,AI-D02,3,dev,I want to know how to arrange a replacement.,ai_draft,clear_negative
+AI-D03-01,AI-D03,1,dev,How many days does standard delivery take?,ai_draft,neutral_information
+AI-D03-02,AI-D03,2,dev,Can I update the delivery address before dispatch?,ai_draft,neutral_information
+AI-D03-03,AI-D03,3,dev,Do you accept debit cards for online orders?,ai_draft,neutral_information
+AI-D04-01,AI-D04,1,dev,"The battery is not bad, but it drains faster than I expected.",ai_draft,negation_intensifier
+AI-D04-02,AI-D04,2,dev,I am not happy with the packaging at all.,ai_draft,negation_intensifier
+AI-D04-03,AI-D04,3,dev,"The charger is really, really slow and the delay is extremely annoying.",ai_draft,negation_intensifier
+AI-D05-01,AI-D05,1,dev,"Great, the parcel is late again. What a surprise.",ai_draft,sarcasm_mixed_emotion
+AI-D05-02,AI-D05,2,dev,Thanks for nothing; I have waited all week.,ai_draft,sarcasm_mixed_emotion
+AI-D05-03,AI-D05,3,dev,"The product looks nice, but the screen arrived cracked.",ai_draft,sarcasm_mixed_emotion
+AI-D06-01,AI-D06,1,dev,ok,ai_draft,short_ambiguous_typos_slang
+AI-D06-02,AI-D06,2,dev,"umm, idk if the code worked",ai_draft,short_ambiguous_typos_slang
+AI-D06-03,AI-D06,3,dev,"pls help with my ordar, it says pending",ai_draft,short_ambiguous_typos_slang
+AI-D07-01,AI-D07,1,dev,LOVE the design!!! 😍,ai_draft,emoji_caps_punctuation
+AI-D07-02,AI-D07,2,dev,THIS IS RIDICULOUS!!! 😡😡,ai_draft,emoji_caps_punctuation
+AI-D07-03,AI-D07,3,dev,Delivery was fine... I guess.,ai_draft,emoji_caps_punctuation
+AI-D08-01,AI-D08,1,dev,"Obrigado, a entrega foi rápida e a caixa está perfeita.",ai_draft,portuguese
+AI-D08-02,AI-D08,2,dev,A encomenda chegou atrasada outra vez e estou muito frustrado.,ai_draft,portuguese
+AI-D08-03,AI-D08,3,dev,"Não estou insatisfeito com o apoio, só preciso de ajuda com o reembolso.",ai_draft,portuguese
+AI-D09-01,AI-D09,1,dev,"Здравствуйте, где моя посылка?",ai_draft,unsupported_language
+AI-D09-02,AI-D09,2,dev,我的订单什么时候到？,ai_draft,unsupported_language
+AI-D09-03,AI-D09,3,dev,مرحبا، أين طلبي؟,ai_draft,unsupported_language
+AI-D10-01,AI-D10,1,dev,I want to speak to a real person about this return.,ai_draft,human_request_threat_closing
+AI-D10-02,AI-D10,2,dev,"If no one fixes this, I will report the charge to my bank.",ai_draft,human_request_threat_closing
+AI-D10-03,AI-D10,3,dev,"Thank you, the agent answered my question and I am satisfied.",ai_draft,human_request_threat_closing
+AI-T01-01,AI-T01,1,test,Everything works well; the setup was quick and easy.,ai_draft,clear_positive
+AI-T01-02,AI-T01,2,test,Thanks for explaining the warranty so clearly.,ai_draft,clear_positive
+AI-T01-03,AI-T01,3,test,"I can finish the rest from here; thanks for walking me through it.",ai_draft,clear_positive
+AI-T02-01,AI-T02,1,test,My laptop arrived with a cracked corner.,ai_draft,clear_negative
+AI-T02-02,AI-T02,2,test,I have been waiting for a response since Monday.,ai_draft,clear_negative
+AI-T02-03,AI-T02,3,test,"I'm genuinely disappointed that a brand-new laptop arrived in this condition.",ai_draft,clear_negative
+AI-T03-01,AI-T03,1,test,The new speakers are not nearly as disappointing as I expected.,ai_draft,negation_intensifier
+AI-T03-02,AI-T03,2,test,I am not pleased with how long the refund is taking.,ai_draft,negation_intensifier
+AI-T03-03,AI-T03,3,test,"The delivery is very, very late and absolutely frustrating.",ai_draft,negation_intensifier
+AI-T04-01,AI-T04,1,test,"Wonderful, another missing package.",ai_draft,sarcasm_mixed_emotion
+AI-T04-02,AI-T04,2,test,"The tracking page says the parcel arrived, but apparently it was delivered to a parallel universe.",ai_draft,sarcasm_mixed_emotion
+AI-T04-03,AI-T04,3,test,"The keyboard is excellent, but the keys stick after one day.",ai_draft,sarcasm_mixed_emotion
+AI-T05-01,AI-T05,1,test,fine,ai_draft,short_ambiguous
+AI-T05-02,AI-T05,2,test,hmm...,ai_draft,short_ambiguous
+AI-T05-03,AI-T05,3,test,?,ai_draft,short_ambiguous
+AI-T06-01,AI-T06,1,test,"thx, that fixed it :)",ai_draft,typos_slang_emoji_caps
+AI-T06-02,AI-T06,2,test,WHERE IS MY ORDER NOW??,ai_draft,typos_slang_emoji_caps
+AI-T06-03,AI-T06,3,test,the earbudz wont connect lol,ai_draft,typos_slang_emoji_caps
+AI-T07-01,AI-T07,1,test,Estou preocupado porque o pagamento foi recusado.,ai_draft,portuguese
+AI-T07-02,AI-T07,2,test,"Por favor, ajudem-me; não sei o que fazer.",ai_draft,portuguese
+AI-T07-03,AI-T07,3,test,"Atualizei os dados do cartão e a compra foi concluída sem problemas.",ai_draft,portuguese
+AI-T08-01,AI-T08,1,test,"Спасибо за помощь, теперь всё работает.",ai_draft,unsupported_language
+AI-T08-02,AI-T08,2,test,"Мои наушники сломались, помогите.",ai_draft,unsupported_language
+AI-T08-03,AI-T08,3,test,我想申请退款。,ai_draft,unsupported_language
+AI-T09-01,AI-T09,1,test,"Please have a senior staff member take ownership of this case instead of sending another automated reply.",ai_draft,human_request_legal_threat
+AI-T09-02,AI-T09,2,test,I will contact my lawyer if you charge me again.,ai_draft,human_request_legal_threat
+AI-T09-03,AI-T09,3,test,I need a human agent to cancel this order.,ai_draft,human_request_legal_threat
+AI-T10-01,AI-T10,1,test,Can you explain the return window for a tablet?,ai_draft,neutral_question_polite_closing
+AI-T10-02,AI-T10,2,test,Is there an update on order 73164?,ai_draft,neutral_question_polite_closing
+AI-T10-03,AI-T10,3,test,"Perfect, thank you; that answers my question.",ai_draft,neutral_question_polite_closing
