@@ -26,9 +26,9 @@
 
 | Phase | Status | Commit |
 |---|---|---|
-| 5 — robustness and reply quality | Done | — |
-| 6 — integration and documentation | In progress | — |
-| 7 — voice channel | Not started; gated on Phase 6 | — |
+| 5 — robustness and reply quality | Done | `04c0ea9` |
+| 6 — integration and documentation | Done | — |
+| 7 — voice channel | In progress; Phase 6 gate passed | — |
 | 8 — face channel | Skipped as directed | — |
 | 9 — evaluation pipeline | Not started; no real ratings available | — |
 | 10 — ethics and limits | Not started | — |
@@ -52,4 +52,20 @@ deadline remain outstanding.
   actions.
 - The 5,000-word local benchmark measured a 40.7-ms median and 42.6-ms
   maximum across five fresh-engine runs, below the 100-ms test budget.
+- No engine output for the 88 evaluation messages was generated or displayed.
+
+### Phase 6 gate
+
+- Python 3.12.10: 89 tests passed; the contract test passed independently.
+- Mandatory and practice scenarios: 8/8 passed with generated logs removed.
+- Protected-file checksum regression: passed. The original ZIP verifier last
+  reported zero mismatches across 29 files at the Phase 5 gate; no protected
+  project files changed in Phase 6.
+- Clean-copy checker: passed from Python 3.12.10 with the contract test, 89
+  tests, and all 8 scenarios.
+- Fresh integration generalization: 15/15 English/Portuguese cases passed.
+  Logged detail lines stayed at or below 650 characters, including the
+  long-evidence probe.
+- Changed/created files passed UTF-8 and replacement-character checks; the
+  root `requirements.txt` remains byte-identical.
 - No engine output for the 88 evaluation messages was generated or displayed.

@@ -1,32 +1,208 @@
-# Text perception engine
+# NovaShop affective support engine
 
-The engine keeps the kit's `engine.engine.Engine` interface and currently
-estimates text only. It supports English and Portuguese using bundled,
-hand-assigned VAD entries plus transparent rules for negation, emphasis,
-punctuation, domain cues, sarcasm, and simple support intents. These estimates
-are starting points, not human-validated ratings. Audio and image inputs are
-not analyzed in this phase; policy still returns the temporary `ANSWER`
-action.
-The coarse emotion labels use the kit vocabulary: `neutral`, `calm`, `joy`,
-`anger`, `frustration`, `fear`, and `sadness`.
+**Author:** `[[ADD STUDENT NAME / GROUP]]`
 
-## Checks
+**Topics:** bilingual text perception; V/A/D affect labels; conversation state,
+ordered support policy and replies; integration, logging and robustness.
 
-From the `affective_project/` directory, run:
+The engine is a transparent, rule-and-lexicon prototype for English and
+Portuguese customer-support messages. Its affect estimates and lexicon tiers
+are provisional; they are not validated against human ratings. It is not a
+production customer-service system.
+
+## Requirements and installation
+
+- Python 3.9 or newer.
+- Text-only operation uses the Python standard library.
+- Tkinter is needed for the desktop interface. Some Linux installations
+  package it separately as `python3-tk`.
+- NumPy is optional and needed only by the voice channel after Phase 7. The
+  engine continues in text-only mode without it.
+- The target teacher computer is offline. Install any needed packages before
+  moving the project there.
+
+Text-only operation requires no package installation. Before enabling voice,
+install NumPy while online, then transfer the prepared environment or wheel to
+the offline teacher computer:
+
+```text
+python -m venv .venv
+python -m pip install "numpy>=1.23,<2.0"
+```
+
+The unchanged `requirements.txt` documents that the core uses only the
+standard library and that NumPy is allowed as an optional dependency. On
+Windows, `py -3.12` can replace `python` in the commands below when that
+launcher version is installed.
+
+## Run the application and checks
+
+Run the interface from the project root:
+
+```text
+python run_app.py
+```
+
+Run one mandatory or practice scenario:
+
+```text
+python run_scenario.py scenarios/mandatory/M1_calm_faq.json
+```
+
+The scenario runner prints each turn and writes a session log under `logs/`.
+Use only the supplied scenario files for this command. Do not pass evaluation
+messages to the scenario runner.
+
+Run the full unit suite and the public contract check:
 
 ```text
 python -m unittest discover tests -v
 python tests/test_contract.py
 ```
 
-The scenario runner prints valence, activity, confidence, and labels for each
-scenario message. Wait until your own SAM ratings are complete before running
-it on any of the evaluation messages.
+From the workspace root, the isolated clean-copy gate is:
 
-## Tuning
+```text
+py -3.12 affective_project_notes/tools/clean_copy_check.py
+```
 
-Shared thresholds and weights are in `config.py`. Do not tune against the
-evaluation messages; use unit-test sentences while implementing and reserve
-the held-out conversations for final evaluation after the rating work is
-complete. Lexicon entries and their provenance are documented in the
-project's sibling [`SOURCES.md`](../../affective_project_notes/SOURCES.md).
+It copies only `affective_project/` to a temporary directory, then runs the
+contract test, full suite, and every scenario in that copy. Use the oldest
+Python available; in the current environment that is Python 3.12. Generated
+scenario output is captured and only pass/fail totals are printed.
+
+## Ratings and evaluation
+
+The interactive human-rating tool is separate from the engine and does not
+run predictions:
+
+```text
+python -m engine.evaluation.rate --rater <anonymous-rater-id>
+```
+
+Use it only with informed, consenting raters. It writes their SAM judgments
+under `engine/evaluation/ratings/`. No real rating files are currently
+available. The model-metrics evaluation pipeline is a later Phase 9 task and
+is not available yet; do not report model metrics until that pipeline has
+been implemented and real ratings are supplied.
+
+## Lexicon tier synchronization
+
+After reviewing the tier sheet, run the required-argument synchronizer from
+the project root:
+
+```text
+python -m engine.tools.sync_lexicon_tiers <path-to-sheet>
+```
+
+The runtime reads the TSV lexicons; it does not load the review sheet.
+
+## Architecture
+
+```text
+run_app.py / run_scenario.py
+          |
+          v
+   harness.Session ----> harness.contract.normalize
+          |                         ^
+          v                         |
+    Engine.process -----------------+
+          |
+          +--> preprocess + language + intent
+          |        |
+          |        +--> tiered lexicons + rules + sarcasm
+          |                         |
+          |                         v
+          |                  text V/A/D + label
+          +--> StateTracker --> ordered R0-R7 policy --> bilingual reply
+          |                         |
+          +--> compact details + flags + stage timings
+                                    |
+                                    v
+                         session history and text log
+```
+
+The current engine processes text only. Optional voice processing is gated on
+the Phase 6 verification gate; face processing is skipped.
+
+## Main configuration
+
+Shared settings live in `engine/config.py`. Changing a threshold changes
+behavior, so rerun the focused tests and scenarios after a change.
+
+| Setting | Default | Effect of increasing it |
+|---|---:|---|
+| `TEXT_LATENCY_BUDGET_SECONDS` | 0.10 | Allows more processing time in the latency regression. |
+| `DETAILS_EVIDENCE_LIMIT` | 2 | Includes more matched terms in each log detail record. |
+| `STATE_ALPHA` | 0.50 | Reacts faster to new affect, but follows message noise more. |
+| `NEG_TURN_V` | -0.25 | Counts milder negative turns toward persistence signals. |
+| `TREND_WORSENING_THRESHOLD` | -0.08 | Requires a steeper decline before marking a worsening trend. |
+| `ESC_V` | -0.65 | Requires a more negative state for escalation. |
+| `ESC_A` | 0.55 | Requires more activity for escalation. |
+| `ESC_TURNS` | 2 | Requires more consecutive severe turns. |
+| `MAX_CLARIFY` | 2 | Allows a longer clarification loop before offering a person. |
+| `EMPATHY_EXIT_V` | -0.15 | Exits the empathic state at a less positive recovery value. |
+| `LABEL_D_WEIGHT` | 0.50 | Gives dominance more influence in prototype distance. |
+| `LABEL_NEUTRAL_RADIUS` | 0.18 | Assigns `neutral` to a larger area around the origin. |
+| `LANG_LEXICON_EVIDENCE_FLOOR` | 0.65 | Trusts a supported-language lexicon match more. |
+
+## Output, details and flags
+
+The public result contains `valence`, `activity`, `dominance`, `confidence`,
+`label`, `action`, `reply`, `flags`, and JSON-serializable `details`.
+`details` is deliberately compact because the harness logger prints it on one
+line:
+
+- `lang`, `lang_confidence`, and `intent` identify the supported-language and
+  intent estimate.
+- `evidence` contains up to `DETAILS_EVIDENCE_LIMIT` entries in the form
+  `[term, V, A, D]`; `evidence_count` is the total number of matches.
+- `sarcasm` is the heuristic score. `text` contains rounded V/A/D/confidence.
+- `voice` and `face` are `null` while those channels are unavailable.
+- `second_label`, `label_distance`, and `second_distance` explain the
+  nearest-prototype decision.
+- `state` contains the smoothed `valence` and `activity`, `trend`,
+  `neg_streak`, and `clar_streak`.
+- `rule` and `reason` identify the first matching policy rule.
+- `timing_ms` reports `text`, `state`, `policy_reply`, and whole-engine
+  `total` time in milliseconds. These are measurements, not fixed limits.
+- `engine_version` identifies this output schema. Internal-error fallback
+  details contain the error type but never expose the exception message.
+
+The current fixed flag vocabulary is:
+
+`abuse`, `caps`, `contrast`, `downtoner`, `elongation`, `empty`,
+`escalation_cue`, `exclamation`, `hesitation`, `human_declined`,
+`human_request`, `intensifier`, `internal_error`, `low_confidence`,
+`mixed_emotion`, `mixed_language`, `negative_event`, `no_affect_words`,
+`possible_sarcasm`, `profanity`, `question`, `repeated_issue`, `safety`,
+`short_message`, `trend_worsening`, `unsupported_language`, `emoji`.
+
+## Limits and channel switches
+
+The current runtime is text-only; it has no voice or face on/off setting.
+Audio and image processing are not active, and passing a media path does not
+add an estimate. Voice may be enabled only after Phase 6 passes its gate and
+the optional NumPy dependency is available. The face channel is skipped.
+
+The English/Portuguese lexicons, sarcasm rules, intent cues, and policy
+thresholds are transparent but heuristic. Unsupported-language detection is
+limited, replies do not access live order systems, and the engine cannot
+confirm refunds, delivery status, or account actions. It does not infer a
+person's true feelings or replace human support. There are no human SAM
+ratings yet, so the estimates are not calibrated.
+
+## Troubleshooting
+
+- **`ModuleNotFoundError: engine`** — run commands from the `affective_project/`
+  root, not from the `engine/` subdirectory.
+- **The desktop window does not start** — confirm Tkinter is installed; on
+  Linux, install the distribution's `python3-tk` package.
+- **A scenario creates a log** — logs are written to `logs/`; keep
+  `logs/README.txt` and remove only generated session logs after verification.
+- **A test hides an internal exception behind a fallback** — set
+  `ENGINE_STRICT=1` in the test process to re-raise the original exception.
+- **The lexicon sync command rejects its arguments** — provide the review
+  sheet path as the required positional argument and verify its tier columns.
+- **The offline computer lacks a dependency** — install Python packages
+  beforehand; text-only execution itself needs no third-party package.

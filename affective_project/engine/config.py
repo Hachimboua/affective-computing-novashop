@@ -9,6 +9,7 @@ MAX_CONFIDENCE = 0.95  # Raising it permits stronger certainty claims; lowering 
 LOW_CONFIDENCE_THRESHOLD = 0.35  # Raising it flags more estimates; lowering it reserves the flag for weaker evidence.
 TEXT_LATENCY_BUDGET_SECONDS = 0.10  # Raising it tolerates slower machines; lowering it demands faster processing.
 HIDDEN_REHEARSAL_MIN_PASS_RATE = 0.90  # Raising it demands broader reliability; lowering it accepts more rehearsal misses.
+DETAILS_EVIDENCE_LIMIT = 2  # Raising it logs more term evidence; lowering it keeps session details shorter.
 UNSUPPORTED_CONFIDENCE_CAP = 0.20  # Raising it trusts unsupported text more; lowering it favors clarification.
 NEUTRAL_CONFIDENCE = 0.55  # Raising it trusts neutral intent more; lowering it treats neutral input as less certain.
 SHORT_TOKEN_LIMIT = 2  # Raising it flags more short messages; lowering it misses terse ambiguity.

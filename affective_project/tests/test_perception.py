@@ -671,7 +671,13 @@ class TextEstimateTests(unittest.TestCase):
         first = engine.process("That was extremely helpful!")
         engine.reset()
         second = engine.process("That was extremely helpful!")
-        self.assertEqual(first, second)
+        first_comparable = dict(first)
+        second_comparable = dict(second)
+        first_comparable["details"] = dict(first["details"])
+        second_comparable["details"] = dict(second["details"])
+        first_comparable["details"].pop("timing_ms")
+        second_comparable["details"].pop("timing_ms")
+        self.assertEqual(first_comparable, second_comparable)
         for key in (
             "valence",
             "activity",

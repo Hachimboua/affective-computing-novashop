@@ -485,7 +485,13 @@ class PolicyTests(unittest.TestCase):
         fresh_result = Engine().process(
             "I feel disappointed that the headset arrived with a cracked case."
         )
-        self.assertEqual(reset_result, fresh_result)
+        reset_comparable = dict(reset_result)
+        fresh_comparable = dict(fresh_result)
+        reset_comparable["details"] = dict(reset_result["details"])
+        fresh_comparable["details"] = dict(fresh_result["details"])
+        reset_comparable["details"].pop("timing_ms")
+        fresh_comparable["details"].pop("timing_ms")
+        self.assertEqual(reset_comparable, fresh_comparable)
 
 
 if __name__ == "__main__":

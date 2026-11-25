@@ -148,3 +148,18 @@
 - No evaluation-message output was used for debugging or displayed. The
   robustness and rehearsal sentences are new and remain separate from
   `messages.csv`.
+
+## Phase 6 - integration and documentation
+
+- The harness logger stringifies `details` as one long line. The first
+  measured examples exceeded 1,100 characters because the engine repeated
+  VAD data and included broad state and evidence structures. Kept a compact
+  state summary, rounded display numbers, and capped logged evidence while
+  retaining the full estimate internally; new integration tests enforce a
+  650-character maximum.
+- Adding per-stage timings made exact whole-result equality inappropriate for
+  reset tests because timings vary between calls. Updated those regressions
+  to compare all deterministic output while excluding only the observational
+  `timing_ms` field.
+- The clean-copy gate captures scenario output and reports only pass/fail
+  totals, preserving the requirement not to display per-message results.

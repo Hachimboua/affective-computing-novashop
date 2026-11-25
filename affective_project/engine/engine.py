@@ -1,6 +1,8 @@
 """Public engine entry point; perception and later phases are composed here."""
 import os
+import time
 
+from . import config
 from .policy.policy import choose_action
 from .policy.replies import render_reply
 from .perception.text_estimator import estimate_text
@@ -24,7 +26,7 @@ def _internal_error_response(error):
         "flags": ["internal_error"],
         "details": {
             "error_type": type(error).__name__,
-            "engine_version": "0.4",
+            "engine_version": "1.0",
         },
     }
 
@@ -49,10 +51,16 @@ class Engine:
 
     def _process(self, text, audio_path=None, image_path=None):
         """Estimate affect, update state, apply policy, and render a reply."""
+        pipeline_started = time.perf_counter()
+        stage_started = pipeline_started
         estimate = estimate_text(
             text, context_valence=self.state_tracker.context_valence
         )
+        text_ms = (time.perf_counter() - stage_started) * 1000.0
+        stage_started = time.perf_counter()
         state = self.state_tracker.begin_turn(estimate, text)
+        state_ms = (time.perf_counter() - stage_started) * 1000.0
+        stage_started = time.perf_counter()
         decision = choose_action(estimate, state, text)
         action = decision["action"]
         flags = sorted(
@@ -66,21 +74,38 @@ class Engine:
             estimate.entities,
             flags,
         )
+        policy_reply_ms = (time.perf_counter() - stage_started) * 1000.0
+        stage_started = time.perf_counter()
         self.state_tracker.record_action(action)
-        state_details = dict(state)
-        state_details["action"] = action
-        state_details["clar_streak"] = (
-            state["clar_streak"] + 1
-            if action == "ASK_CLARIFICATION"
-            else 0
-        )
-        if action == "OFFER_HUMAN":
-            state_details["human_offered_turn"] = state["turn"]
-            state_details["human_offer_age"] = 0
-            state_details["human_declined"] = False
-        if action == "ESCALATE":
-            state_details["escalated"] = True
-        return {
+        state_ms += (time.perf_counter() - stage_started) * 1000.0
+        state_details = {
+            "valence": round(float(state["valence"]), 3),
+            "activity": round(float(state["activity"]), 3),
+            "trend": round(float(state["trend"]), 3),
+            "neg_streak": state["neg_streak"],
+            "clar_streak": (
+                state["clar_streak"] + 1
+                if action == "ASK_CLARIFICATION"
+                else 0
+            ),
+        }
+        evidence = [
+            [
+                item["term"],
+                *[
+                    round(float(value), 3)
+                    for value in item["contribution"]
+                ],
+            ]
+            for item in estimate.evidence[: config.DETAILS_EVIDENCE_LIMIT]
+        ]
+        timing_ms = {
+            "text": round(text_ms, 3),
+            "state": round(state_ms, 3),
+            "policy_reply": round(policy_reply_ms, 3),
+            "total": 0.0,
+        }
+        result = {
             "valence": float(estimate.valence),
             "activity": float(estimate.activity),
             "dominance": float(estimate.dominance),
@@ -93,27 +118,34 @@ class Engine:
                 "lang": estimate.language,
                 "lang_confidence": float(estimate.language_confidence),
                 "intent": estimate.intent,
-                "entities": dict(estimate.entities),
-                "evidence": list(estimate.evidence),
-                "sarcasm": float(estimate.sarcasm_score),
+                "evidence": evidence,
+                "evidence_count": len(estimate.evidence),
+                "sarcasm": round(float(estimate.sarcasm_score), 3),
                 "text": {
-                    "v": float(estimate.valence),
-                    "a": float(estimate.activity),
-                    "d": float(estimate.dominance),
-                    "c": float(estimate.confidence),
+                    "v": round(float(estimate.valence), 3),
+                    "a": round(float(estimate.activity), 3),
+                    "d": round(float(estimate.dominance), 3),
+                    "c": round(float(estimate.confidence), 3),
                 },
+                "voice": None,
+                "face": None,
                 "second_label": estimate.label_details["second_label"],
-                "label_distance": float(
-                    estimate.label_details["label_distance"]
+                "label_distance": round(
+                    float(estimate.label_details["label_distance"]), 3
                 ),
                 "second_distance": (
-                    float(estimate.label_details["second_distance"])
+                    round(float(estimate.label_details["second_distance"]), 3)
                     if estimate.label_details["second_distance"] is not None
                     else None
                 ),
                 "state": state_details,
                 "rule": decision["rule"],
                 "reason": decision["reason"],
-                "engine_version": "0.3",
+                "timing_ms": timing_ms,
+                "engine_version": "1.0",
             },
         }
+        timing_ms["total"] = round(
+            (time.perf_counter() - pipeline_started) * 1000.0, 3
+        )
+        return result

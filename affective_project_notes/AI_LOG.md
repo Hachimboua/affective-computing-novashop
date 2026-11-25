@@ -171,3 +171,18 @@
   40/40 and fresh language generalization passed 15/15.
 - **What I changed:**
 - **How I verified it:**
+
+## 2026-11-25 - Phase 6 - integration and documentation
+
+- **What I asked for:** Complete the engine README, make logged `details`
+  compact and JSON-serializable, measure pipeline stages, document flags and
+  limits, and add an isolated clean-copy checker. Preserve the protected kit
+  and keep the 88 evaluation-message outputs hidden.
+- **What the AI produced:** Added text/state/policy-reply/total timing fields,
+  capped and rounded log evidence, compact state details, 15 fresh
+  English/Portuguese integration cases, and the clean-copy verifier. Rewrote
+  `engine/README.md` and updated Topic 4, `DIFFICULTIES.md`, `AI_LOG.md`, and
+  `STATUS.md`. NumPy is documented as optional for the voice channel; the
+  protected root requirements file remains unchanged.
+- **What I changed:**
+- **How I verified it:**
