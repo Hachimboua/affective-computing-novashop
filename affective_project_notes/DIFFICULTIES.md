@@ -163,3 +163,18 @@
   `timing_ms` field.
 - The clean-copy gate captures scenario output and reports only pass/fail
   totals, preserving the requirement not to display per-message results.
+
+## Phase 7 - optional voice channel
+
+- NumPy must remain optional because text-only use is the baseline and the
+  teacher's target computer may be offline. Guarded imports and narrowly
+  handled WAV errors now preserve a text-only response with `audio_unavailable`
+  for missing, corrupt, unsupported, or dependency-free audio processing.
+- Absolute pitch was unsuitable for activity because both bundled low- and
+  high-pitch speaker fixtures are calm. Activity uses energy, pitch
+  variability, and speaking-rate proxy instead; fixture tests enforce
+  speaker-pitch invariance and louder-signal ordering.
+- The new audio details initially duplicated text V/A/D and risked expanding
+  the protected one-line logger output. Kept text-only result details stable
+  by including voice/fusion timings only when an audio path is supplied and
+  including a fused estimate only when voice analysis succeeds.

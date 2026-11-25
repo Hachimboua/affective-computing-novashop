@@ -186,3 +186,22 @@
   protected root requirements file remains unchanged.
 - **What I changed:**
 - **How I verified it:**
+
+## 2026-11-25 - Phase 7 - optional voice channel
+
+- **What I asked for:** Implement the optional NumPy WAV feature pipeline,
+  cautious voice estimates, confidence-weighted late fusion, graceful
+  text-only fallbacks, and regression coverage without changing the protected
+  kit or exposing output for the 88 evaluation messages.
+- **What the AI produced:** Added framed energy, ZCR, spectral centroid,
+  autocorrelation pitch, MFCC, SNR, clipping, and speaking-rate features;
+  fixture-derived reference statistics; voice confidence and affect estimates;
+  and late fusion that keeps text dominant for valence and lets voice
+  contribute more to activity. Added `audio_used`, `audio_unavailable`,
+  `no_speech`, and `modality_conflict` handling, modality details, conditional
+  voice/fusion timings, and optional NumPy guidance in the README and Topic 2.
+- **What I changed:**
+- **How I verified it:** Python 3.12.10 full suite and protected-kit check:
+  102 tests passed. The clean-copy gate passed with 102 tests and 8/8
+  scenarios. Fifteen new bilingual cases passed and were checked against
+  `messages.csv` and earlier tests. No held-out engine output was run or shown.

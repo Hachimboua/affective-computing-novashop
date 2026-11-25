@@ -3,10 +3,13 @@ import os
 import time
 
 from . import config
+from .affect.fusion import fuse_text_voice
 from .policy.policy import choose_action
 from .policy.replies import render_reply
 from .perception.text_estimator import estimate_text
 from .state.tracker import StateTracker
+from .voice.features import AudioInputError, numpy_available
+from .voice.voice_estimator import estimate_voice
 
 
 def _internal_error_response(error):
@@ -56,7 +59,28 @@ class Engine:
         estimate = estimate_text(
             text, context_valence=self.state_tracker.context_valence
         )
+        text_estimate = estimate
         text_ms = (time.perf_counter() - stage_started) * 1000.0
+        voice_estimate = None
+        audio_flags = set()
+        voice_ms = 0.0
+        fusion_ms = 0.0
+        if audio_path is not None:
+            stage_started = time.perf_counter()
+            if config.VOICE_ENABLED and numpy_available():
+                try:
+                    voice_estimate = estimate_voice(audio_path)
+                except AudioInputError:
+                    audio_flags.add("audio_unavailable")
+                else:
+                    audio_flags.add("audio_used")
+            else:
+                audio_flags.add("audio_unavailable")
+            voice_ms = (time.perf_counter() - stage_started) * 1000.0
+            if voice_estimate is not None:
+                stage_started = time.perf_counter()
+                estimate, _ = fuse_text_voice(estimate, voice_estimate)
+                fusion_ms = (time.perf_counter() - stage_started) * 1000.0
         stage_started = time.perf_counter()
         state = self.state_tracker.begin_turn(estimate, text)
         state_ms = (time.perf_counter() - stage_started) * 1000.0
@@ -64,7 +88,10 @@ class Engine:
         decision = choose_action(estimate, state, text)
         action = decision["action"]
         flags = sorted(
-            set(estimate.flags) | set(state["flags"]) | set(decision["flags"])
+            set(estimate.flags)
+            | set(state["flags"])
+            | set(decision["flags"])
+            | audio_flags
         )
         reply = render_reply(
             action,
@@ -99,12 +126,61 @@ class Engine:
             ]
             for item in estimate.evidence[: config.DETAILS_EVIDENCE_LIMIT]
         ]
-        timing_ms = {
-            "text": round(text_ms, 3),
-            "state": round(state_ms, 3),
-            "policy_reply": round(policy_reply_ms, 3),
-            "total": 0.0,
+        timing_ms = {"text": round(text_ms, 3)}
+        if audio_path is not None:
+            timing_ms.update(
+                {
+                    "voice": round(voice_ms, 3),
+                    "fusion": round(fusion_ms, 3),
+                }
+            )
+        timing_ms.update(
+            {
+                "state": round(state_ms, 3),
+                "policy_reply": round(policy_reply_ms, 3),
+                "total": 0.0,
+            }
+        )
+        details = {
+            "lang": estimate.language,
+            "lang_confidence": float(estimate.language_confidence),
+            "intent": estimate.intent,
+            "evidence": evidence,
+            "evidence_count": len(estimate.evidence),
+            "sarcasm": round(float(estimate.sarcasm_score), 3),
+            "text": {
+                "v": round(float(text_estimate.valence), 3),
+                "a": round(float(text_estimate.activity), 3),
+                "d": round(float(text_estimate.dominance), 3),
+                "c": round(float(text_estimate.confidence), 3),
+            },
+            "voice": (
+                voice_estimate.as_dict()
+                if voice_estimate is not None
+                else None
+            ),
+            "second_label": estimate.label_details["second_label"],
+            "label_distance": round(
+                float(estimate.label_details["label_distance"]), 3
+            ),
+            "second_distance": (
+                round(float(estimate.label_details["second_distance"]), 3)
+                if estimate.label_details["second_distance"] is not None
+                else None
+            ),
+            "state": state_details,
+            "rule": decision["rule"],
+            "reason": decision["reason"],
+            "timing_ms": timing_ms,
+            "engine_version": "1.0",
         }
+        if voice_estimate is not None:
+            details["fused"] = {
+                "v": round(float(estimate.valence), 3),
+                "a": round(float(estimate.activity), 3),
+                "d": round(float(estimate.dominance), 3),
+                "c": round(float(estimate.confidence), 3),
+            }
         result = {
             "valence": float(estimate.valence),
             "activity": float(estimate.activity),
@@ -114,36 +190,7 @@ class Engine:
             "action": action,
             "reply": reply,
             "flags": flags,
-            "details": {
-                "lang": estimate.language,
-                "lang_confidence": float(estimate.language_confidence),
-                "intent": estimate.intent,
-                "evidence": evidence,
-                "evidence_count": len(estimate.evidence),
-                "sarcasm": round(float(estimate.sarcasm_score), 3),
-                "text": {
-                    "v": round(float(estimate.valence), 3),
-                    "a": round(float(estimate.activity), 3),
-                    "d": round(float(estimate.dominance), 3),
-                    "c": round(float(estimate.confidence), 3),
-                },
-                "voice": None,
-                "face": None,
-                "second_label": estimate.label_details["second_label"],
-                "label_distance": round(
-                    float(estimate.label_details["label_distance"]), 3
-                ),
-                "second_distance": (
-                    round(float(estimate.label_details["second_distance"]), 3)
-                    if estimate.label_details["second_distance"] is not None
-                    else None
-                ),
-                "state": state_details,
-                "rule": decision["rule"],
-                "reason": decision["reason"],
-                "timing_ms": timing_ms,
-                "engine_version": "1.0",
-            },
+            "details": details,
         }
         timing_ms["total"] = round(
             (time.perf_counter() - pipeline_started) * 1000.0, 3

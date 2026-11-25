@@ -35,6 +35,26 @@ The inverse SAM conversion supports evaluation later. No SAM ratings were
 available during this phase, so the prototypes were not tuned against the
 evaluation messages.
 
+## Optional voice channel (Phase 7)
+
+The optional voice path reads mono or stereo 16-bit PCM WAV data and extracts
+short-time energy, zero-crossing rate, spectral centroid, autocorrelation
+pitch, Mel-frequency cepstral coefficients, a voiced-frame speaking-rate
+proxy, signal-to-noise estimate, and clipping ratio. NumPy is an optional
+dependency; if it is absent or the WAV cannot be read, the engine keeps its
+text-only result and adds `audio_unavailable`. Silence is represented with
+`no_speech`, rather than treating a silent recording as emotional evidence.
+
+Late fusion scales the text and voice contribution by each modality's
+confidence. Text remains the primary source for valence, while voice can
+contribute more to activity. Mean pitch is not used as an emotion cue because
+the bundled low- and high-pitch speaker examples are both calm; pitch
+variability is only a weak cue. Agreement can modestly increase confidence,
+while opposite polarity or strongly positive text with flat prosody can lower
+confidence and add `modality_conflict`. The output preserves separate `text`
+and `voice` estimates alongside `fused`, so the approximate voice contribution
+is inspectable. These fixture-based heuristics are not human-calibrated.
+
 ## How to change it
 
 - To change the label geometry, edit one prototype row in

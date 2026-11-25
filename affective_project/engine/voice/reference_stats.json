@@ -1,0 +1,26 @@
+{
+  "note": "Fixture-derived reference only; pitch-based activity is based on variability, not absolute F0, because both speaker fixtures are calm.",
+  "sources": [
+    "agitated_clean.wav",
+    "agitated_noisy.wav",
+    "calm_clean.wav",
+    "calm_noisy.wav",
+    "speaker_high.wav",
+    "speaker_low.wav"
+  ],
+  "statistics": {
+    "energy_db": {
+      "mean": -25.9597401436604,
+      "std": 9.012982106880747
+    },
+    "f0_variability": {
+      "mean": 0.038457556384458066,
+      "std": 0.06757486178742546
+    },
+    "speaking_rate": {
+      "mean": 3.1666666666666665,
+      "std": 4.099457958749614
+    }
+  },
+  "version": 1
+}

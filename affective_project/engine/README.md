@@ -27,7 +27,7 @@ the offline teacher computer:
 
 ```text
 python -m venv .venv
-python -m pip install "numpy>=1.23,<2.0"
+python -m pip install "numpy>=1.23"
 ```
 
 The unchanged `requirements.txt` documents that the core uses only the
@@ -107,13 +107,18 @@ run_app.py / run_scenario.py
           |                         ^
           v                         |
     Engine.process -----------------+
-          |
-          +--> preprocess + language + intent
-          |        |
-          |        +--> tiered lexicons + rules + sarcasm
           |                         |
-          |                         v
-          |                  text V/A/D + label
+          +--> preprocess + language + intent
+          |        |                |
+          |        +--> lexicons + rules + sarcasm
+          |        |                |
+          |        |                v
+          |        |          text V/A/D
+          |        |                |
+          |        +--> optional WAV features + voice estimate
+          |                         |
+          |                    late fusion
+          |                         |
           +--> StateTracker --> ordered R0-R7 policy --> bilingual reply
           |                         |
           +--> compact details + flags + stage timings
@@ -122,8 +127,13 @@ run_app.py / run_scenario.py
                          session history and text log
 ```
 
-The current engine processes text only. Optional voice processing is gated on
-the Phase 6 verification gate; face processing is skipped.
+Voice processing is optional, uses NumPy when available, and accepts mono or
+stereo 16-bit PCM WAV files. Text remains dominant for valence; voice has more
+influence on activity. The voice-only valence cue is deliberately weak, and
+modality disagreement lowers confidence and can flag `modality_conflict`.
+Without NumPy, or for a missing/corrupt/unsupported WAV, the engine keeps the
+text estimate and adds `audio_unavailable`. Silence is marked `no_speech`.
+`audio_path=None` is the text-only path. Face processing is skipped.
 
 ## Main configuration
 
@@ -134,6 +144,11 @@ behavior, so rerun the focused tests and scenarios after a change.
 |---|---:|---|
 | `TEXT_LATENCY_BUDGET_SECONDS` | 0.10 | Allows more processing time in the latency regression. |
 | `DETAILS_EVIDENCE_LIMIT` | 2 | Includes more matched terms in each log detail record. |
+| `VOICE_ENABLED` | `True` | Disables voice processing when set to `False`. |
+| `VOICE_FRAME_MS` | 25 | Sets short-time analysis frame length. |
+| `VOICE_HOP_MS` | 10 | Sets the step between overlapping frames. |
+| `TEXT_ACTIVITY_WEIGHT` / `VOICE_ACTIVITY_WEIGHT` | 0.40 / 0.60 | Shifts fused activity toward text or voice. |
+| `TEXT_VALENCE_WEIGHT` / `VOICE_VALENCE_WEIGHT` | 0.90 / 0.10 | Keeps fused valence primarily text-based. |
 | `STATE_ALPHA` | 0.50 | Reacts faster to new affect, but follows message noise more. |
 | `NEG_TURN_V` | -0.25 | Counts milder negative turns toward persistence signals. |
 | `TREND_WORSENING_THRESHOLD` | -0.08 | Requires a steeper decline before marking a worsening trend. |
@@ -157,33 +172,37 @@ line:
   intent estimate.
 - `evidence` contains up to `DETAILS_EVIDENCE_LIMIT` entries in the form
   `[term, V, A, D]`; `evidence_count` is the total number of matches.
-- `sarcasm` is the heuristic score. `text` contains rounded V/A/D/confidence.
-- `voice` and `face` are `null` while those channels are unavailable.
+- `sarcasm` is the heuristic score. `text` contains rounded V/A/D/confidence;
+  when audio is used, `voice` and `fused` contain the modality and combined
+  estimates.
 - `second_label`, `label_distance`, and `second_distance` explain the
   nearest-prototype decision.
 - `state` contains the smoothed `valence` and `activity`, `trend`,
   `neg_streak`, and `clar_streak`.
 - `rule` and `reason` identify the first matching policy rule.
 - `timing_ms` reports `text`, `state`, `policy_reply`, and whole-engine
-  `total` time in milliseconds. These are measurements, not fixed limits.
+  `total` time in milliseconds. When an audio path is supplied, it also
+  reports `voice` and `fusion`. These are measurements, not fixed limits.
 - `engine_version` identifies this output schema. Internal-error fallback
   details contain the error type but never expose the exception message.
 
 The current fixed flag vocabulary is:
 
-`abuse`, `caps`, `contrast`, `downtoner`, `elongation`, `empty`,
+`abuse`, `audio_unavailable`, `audio_used`, `caps`, `contrast`, `downtoner`,
+`elongation`, `empty`,
 `escalation_cue`, `exclamation`, `hesitation`, `human_declined`,
 `human_request`, `intensifier`, `internal_error`, `low_confidence`,
-`mixed_emotion`, `mixed_language`, `negative_event`, `no_affect_words`,
-`possible_sarcasm`, `profanity`, `question`, `repeated_issue`, `safety`,
+`mixed_emotion`, `mixed_language`, `modality_conflict`, `negative_event`,
+`no_affect_words`, `no_speech`, `possible_sarcasm`, `profanity`, `question`,
+`repeated_issue`, `safety`,
 `short_message`, `trend_worsening`, `unsupported_language`, `emoji`.
 
 ## Limits and channel switches
 
-The current runtime is text-only; it has no voice or face on/off setting.
-Audio and image processing are not active, and passing a media path does not
-add an estimate. Voice may be enabled only after Phase 6 passes its gate and
-the optional NumPy dependency is available. The face channel is skipped.
+Voice is a lightweight optional channel, not a transcription system or a
+validated emotion recognizer. It cannot identify speakers or infer their true
+feelings; fixture-derived references and signal-quality measures are only
+approximate. The engine does not load face inputs or infer facial affect.
 
 The English/Portuguese lexicons, sarcasm rules, intent cues, and policy
 thresholds are transparent but heuristic. Unsupported-language detection is

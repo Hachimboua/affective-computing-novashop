@@ -28,7 +28,7 @@
 |---|---|---|
 | 5 — robustness and reply quality | Done | `04c0ea9` |
 | 6 — integration and documentation | Done | — |
-| 7 — voice channel | In progress; Phase 6 gate passed | — |
+| 7 — voice channel | Done | — |
 | 8 — face channel | Skipped as directed | — |
 | 9 — evaluation pipeline | Not started; no real ratings available | — |
 | 10 — ethics and limits | Not started | — |
@@ -68,4 +68,18 @@ deadline remain outstanding.
   long-evidence probe.
 - Changed/created files passed UTF-8 and replacement-character checks; the
   root `requirements.txt` remains byte-identical.
+- No engine output for the 88 evaluation messages was generated or displayed.
+
+### Phase 7 gate
+
+- Python 3.12.10: 102 tests passed, including the public contract and
+  byte-identical protected-kit check.
+- Clean-copy checker: passed with 102 tests and all 8 scenarios.
+- Voice regressions cover synthetic pitch/noise/silence, quality-weighted
+  confidence, louder-signal activity, speaker pitch invariance, malformed or
+  unsupported audio, text-only fallback, and late fusion.
+- Fifteen fresh English/Portuguese cases passed with the optional audio path;
+  they are absent from `messages.csv` and prior test files.
+- Voice references were generated from the six bundled WAV fixtures. NumPy
+  remains optional, and the root `requirements.txt` was not changed.
 - No engine output for the 88 evaluation messages was generated or displayed.
