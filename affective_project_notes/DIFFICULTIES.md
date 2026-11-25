@@ -110,3 +110,10 @@
 - Added the missing `unbelievable`, `nonsense`, and `this is a joke` entries
   with provisional tiers, and synchronized those additions into the review
   sheet. Existing `ridiculous` and `absurd` were already present.
+
+## Part A4 - safety-specific emergency guidance
+
+- Generic escalation replies mentioned emergency services even for legal,
+  threat, and anger escalations. Emergency guidance is now isolated to the
+  safety-flag reply; other escalations direct the customer to urgent human
+  review in English or Portuguese.

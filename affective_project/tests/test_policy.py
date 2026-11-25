@@ -185,6 +185,78 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(result["details"]["lang"], "en")
         self.assertNotIn("unsupported_language", result["flags"])
 
+    def test_only_safety_escalations_mention_emergency_services(self):
+        safety_examples = (
+            (
+                "I might hurt myself tonight; I need help.",
+                "en",
+                "emergency services",
+            ),
+            (
+                "Quero fazer mal a mim próprio e preciso de ajuda.",
+                "pt",
+                "serviços de emergência locais",
+            ),
+        )
+        non_safety_examples = (
+            ("I am taking this invoice issue to court.", "en"),
+            ("Vou levar esta cobrança ao tribunal.", "pt"),
+            ("I will hurt you if you ignore me.", "en"),
+        )
+        anger_sequences = (
+            (
+                "I am furious about this disgraceful failure!!!",
+                "This is outrageous, I am absolutely enraged!!!",
+            ),
+            (
+                "Estou furioso com esta falha e indignado!!!",
+                "Estou revoltado e muito zangado com o problema!!!",
+            ),
+        )
+        all_messages = [
+            text for text, _, _ in safety_examples
+        ] + [text for text, _ in non_safety_examples]
+        all_messages.extend(text for sequence in anger_sequences for text in sequence)
+        self.assert_new_sentences(all_messages)
+
+        for text, language, emergency_phrase in safety_examples:
+            with self.subTest(safety=True, language=language):
+                result = Engine().process(text)
+                self.assertEqual(result["action"], "ESCALATE")
+                self.assertEqual(result["details"]["lang"], language)
+                self.assertIn("safety", result["flags"])
+                self.assertIn(emergency_phrase, result["reply"].casefold())
+
+        non_safety_results = []
+        for text, language in non_safety_examples:
+            with self.subTest(safety=False, language=language):
+                result = Engine().process(text)
+                self.assertEqual(result["action"], "ESCALATE")
+                self.assertEqual(result["details"]["lang"], language)
+                self.assertNotIn("safety", result["flags"])
+                non_safety_results.append(result)
+
+        for sequence in anger_sequences:
+            engine = Engine()
+            engine.process(sequence[0])
+            result = engine.process(sequence[1])
+            self.assertEqual(result["action"], "ESCALATE")
+            self.assertNotIn("safety", result["flags"])
+            non_safety_results.append(result)
+
+        for result in non_safety_results:
+            with self.subTest(language=result["details"]["lang"]):
+                person_word = (
+                    "person"
+                    if result["details"]["lang"] == "en"
+                    else "pessoa"
+                )
+                self.assertIn(person_word, result["reply"].casefold())
+                self.assertNotIn("emergency services", result["reply"].casefold())
+                self.assertNotIn("serviços de emergência", result["reply"].casefold())
+                self.assertNotIn("immediate danger", result["reply"].casefold())
+                self.assertNotIn("perigo imediato", result["reply"].casefold())
+
     def test_explicit_legal_cue_overrides_positive_closing_language(self):
         result = Engine().process(
             "Thanks for helping, but I will contact a lawyer if this remains unresolved."

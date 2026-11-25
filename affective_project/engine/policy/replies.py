@@ -73,8 +73,8 @@ _EN_ACTION_PATTERNS = {
         "I'm an automated assistant. Would you like me to request a human handoff for {problem}?",
     ),
     "ESCALATE": (
-        "I'm an automated assistant. This needs urgent attention from a person. If anyone is in immediate danger, contact local emergency services.",
-        "I'm an automated assistant. A person should review this urgently. If there is immediate danger, contact local emergency services.",
+        "I'm an automated assistant. This needs urgent attention from a person.",
+        "I'm an automated assistant. A person should review this urgently.",
     ),
     "CLOSE_POSITIVE": (
         "I'm glad we could resolve this. Thank you for contacting NovaShop.",
@@ -99,8 +99,8 @@ _PT_ACTION_PATTERNS = {
         "Sou um assistente automatizado. Gostaria que pedisse o apoio de uma pessoa para {problem}?",
     ),
     "ESCALATE": (
-        "Sou um assistente automatizado. Esta situação precisa de atenção humana urgente. Se houver perigo imediato, contacte os serviços de emergência locais.",
-        "Sou um assistente automatizado. Uma pessoa deve analisar isto com urgência. Se houver perigo imediato, contacte os serviços de emergência locais.",
+        "Sou um assistente automatizado. Esta situação precisa de atenção urgente de uma pessoa.",
+        "Sou um assistente automatizado. Uma pessoa deve analisar isto com urgência.",
     ),
     "CLOSE_POSITIVE": (
         "Ainda bem que conseguimos resolver a questão. Obrigado por contactar a NovaShop.",
