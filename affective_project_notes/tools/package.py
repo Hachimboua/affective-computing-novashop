@@ -6,7 +6,7 @@ Usage (from the AC solo folder, after the report and video exist):
         --group Group07 ^
         --report path/to/report.pdf ^
         --video path/to/video_demo.mp4 ^
-        --demo-log affective_project/logs/session_20261201_101500.txt ^
+        --demo-log affective_project/logs/session_20261201_101500.txt affective_project/logs/session_20261201_101620.txt ^
         --kit-zip "path/to/Student_Kit_to_share_with_students.zip" ^
         --ratings include
 
@@ -14,12 +14,14 @@ The zip contains exactly what the brief asks for (section 5):
     report.pdf
     video_demo.mp4
     code/            the project folder with our engine, its README, the
-                     requirements file and the log of the demo session
+                     requirements file and the log(s) of the demo session
+                     ("Reset session" in the interface starts a new log file,
+                     so a demo usually has one log per scenario)
 
 Before writing the zip the script:
   1. refuses to run if the report or video is missing or has the wrong type;
   2. copies affective_project/ to a staging folder without __pycache__ and
-     without session logs (only the demo log you name is kept);
+     without session logs (only the demo logs you name are kept);
   3. checks every protected kit file against the original kit zip;
   4. runs the contract test, all tests and all scenarios inside the staged
      code/ folder, exactly as the teacher would;
@@ -58,13 +60,14 @@ def _human(size):
     return str(size)
 
 
-def stage_code(destination, demo_log, include_ratings):
-    """Copy the project to destination/code and keep only the demo log."""
+def stage_code(destination, demo_logs, include_ratings):
+    """Copy the project to destination/code and keep only the demo logs."""
     code = destination / "code"
     shutil.copytree(str(PROJECT_ROOT), str(code), ignore=IGNORED)
     for log in (code / "logs").glob("session_*.txt"):
         log.unlink()
-    shutil.copy2(str(demo_log), str(code / "logs" / Path(demo_log).name))
+    for demo_log in demo_logs:
+        shutil.copy2(str(demo_log), str(code / "logs" / Path(demo_log).name))
     ratings = code / "engine" / "evaluation" / "ratings"
     if not include_ratings and ratings.exists():
         shutil.rmtree(str(ratings))
@@ -108,7 +111,7 @@ def main(argv=None):
     parser.add_argument("--group", required=True, help="group id, e.g. Group07")
     parser.add_argument("--report", required=True, help="path to report.pdf")
     parser.add_argument("--video", required=True, help="path to video_demo.mp4")
-    parser.add_argument("--demo-log", required=True, help="session log recorded during the video")
+    parser.add_argument("--demo-log", required=True, nargs="+", help="session log file(s) recorded during the video")
     parser.add_argument("--kit-zip", required=True, help="original kit zip, for the byte-for-byte check")
     parser.add_argument("--ratings", choices=("include", "exclude"), required=True,
                         help="include the anonymous rating files in code/ (only if the consent form allows it)")
@@ -119,13 +122,15 @@ def main(argv=None):
     problems = []
     if args.group == "GroupXX" and not args.allow_placeholder_group:
         problems.append("replace GroupXX with your real group id (or pass --allow-placeholder-group for a test run)")
-    report, video, demo_log = Path(args.report), Path(args.video), Path(args.demo_log)
+    report, video = Path(args.report), Path(args.video)
+    demo_logs = [Path(item) for item in args.demo_log]
     if not report.is_file() or report.suffix.lower() != ".pdf":
         problems.append("report not found or not a .pdf: %s" % report)
     if not video.is_file() or video.suffix.lower() != ".mp4":
         problems.append("video not found or not an .mp4: %s" % video)
-    if not demo_log.is_file() or not demo_log.name.startswith("session_"):
-        problems.append("demo log not found or not a session_*.txt file: %s" % demo_log)
+    for demo_log in demo_logs:
+        if not demo_log.is_file() or not demo_log.name.startswith("session_"):
+            problems.append("demo log not found or not a session_*.txt file: %s" % demo_log)
     if not Path(args.kit_zip).is_file():
         problems.append("original kit zip not found: %s" % args.kit_zip)
     if problems:
@@ -140,7 +145,7 @@ def main(argv=None):
         staging.mkdir()
         shutil.copy2(str(report), str(staging / "report.pdf"))
         shutil.copy2(str(video), str(staging / "video_demo.mp4"))
-        code = stage_code(staging, demo_log, args.ratings == "include")
+        code = stage_code(staging, demo_logs, args.ratings == "include")
 
         mismatches, checked = verify_kit.verify(args.kit_zip, project_root=code)
         if mismatches:

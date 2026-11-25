@@ -1,6 +1,7 @@
 """Sync reviewed tier choices from the project review sheet into TSV lexicons."""
 import argparse
 import csv
+import io
 import os
 from pathlib import Path
 import tempfile
@@ -14,12 +15,27 @@ HEADER = ("term", "tier", "v_override", "a_override", "d_override")
 REQUIRED_COLUMNS = {"Lexicon", "term", "suggested tier", "my tier"}
 
 
+def detect_delimiter(header_line):
+    """Return the column separator used in a CSV header line.
+
+    Excel on some Windows language settings (for example Portuguese) saves
+    "CSV UTF-8" files with ';' instead of ','. Accepting ',', ';' and tab keeps
+    the sync working whichever spreadsheet program was used.
+    """
+    counts = {delimiter: header_line.count(delimiter) for delimiter in (",", ";", "\t")}
+    best = max(counts, key=counts.get)
+    return best if counts[best] else ","
+
+
 def sync_tiers(sheet_path, lexicon_dir=LEXICON_DIR):
     """Write my tier when present, otherwise suggested tier, into each TSV."""
     sheet_path = Path(sheet_path)
     lexicon_dir = Path(lexicon_dir)
-    with sheet_path.open("r", encoding="utf-8-sig", newline="") as stream:
-        reader = csv.DictReader(stream)
+    with sheet_path.open("r", encoding="utf-8-sig", newline="") as source:
+        text = source.read()
+    header_line = text.split("\n", 1)[0]
+    with io.StringIO(text, newline="") as stream:
+        reader = csv.DictReader(stream, delimiter=detect_delimiter(header_line))
         if not REQUIRED_COLUMNS.issubset(reader.fieldnames or ()):
             raise ValueError("The review sheet is missing required tier columns.")
         selected_tiers = {}

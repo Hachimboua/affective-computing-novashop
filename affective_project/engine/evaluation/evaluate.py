@@ -27,6 +27,7 @@ import argparse
 import contextlib
 import csv
 import importlib.util
+import io
 import json
 import os
 import sys
@@ -80,28 +81,53 @@ def load_messages(path):
         return list(csv.DictReader(stream))
 
 
+def _read_csv(path):
+    """Read a CSV written by the rating tool or saved from a spreadsheet.
+
+    Spreadsheets may add a UTF-8 byte-order mark and, on some Windows language
+    settings, use ';' instead of ',' between columns. Both are accepted.
+    """
+    with open(path, encoding="utf-8-sig", newline="") as stream:
+        text = stream.read()
+    header = text.split("\n", 1)[0]
+    counts = {delimiter: header.count(delimiter) for delimiter in (",", ";", "\t")}
+    delimiter = max(counts, key=counts.get) if max(counts.values()) else ","
+    return list(csv.DictReader(io.StringIO(text, newline=""), delimiter=delimiter))
+
+
 def load_ratings(ratings_dir):
     """Return a list of validated rating rows from every rater CSV.
 
-    Rows with values outside 1..9 or an unknown label/action are rejected
-    with a clear error, because silently skipping them would bias results.
+    Rows where all three SAM values are empty are treated as "not rated yet"
+    and skipped (a volunteer may stop half-way). Partly filled rows, values
+    outside 1..9, or an unknown label/action are rejected with a clear error,
+    because silently skipping them would bias the results. When a spreadsheet
+    row has no rater_id, the file name (e.g. R2.csv -> R2) is used.
     """
     ratings_dir = Path(ratings_dir)
     if not ratings_dir.is_dir():
         return []
     rows = []
     for path in sorted(ratings_dir.glob("*.csv")):
-        with open(path, encoding="utf-8", newline="") as stream:
-            for line_number, row in enumerate(csv.DictReader(stream), start=2):
-                for column in RATING_COLUMNS.values():
-                    value = int(row[column])
-                    if not 1 <= value <= 9:
-                        raise ValueError("%s line %d: %s=%s is outside 1..9" % (path.name, line_number, column, value))
-                if row["label"] not in LABELS:
-                    raise ValueError("%s line %d: unknown label %r" % (path.name, line_number, row["label"]))
-                if row["action"] not in ACTIONS:
-                    raise ValueError("%s line %d: unknown action %r" % (path.name, line_number, row["action"]))
-                rows.append(row)
+        for line_number, row in enumerate(_read_csv(path), start=2):
+            values = [(row.get(column) or "").strip() for column in RATING_COLUMNS.values()]
+            if not any(values):
+                continue
+            if not all(values):
+                raise ValueError("%s line %d: fill valence, arousal and dominance (or leave all three empty)" % (path.name, line_number))
+            for column in RATING_COLUMNS.values():
+                value = int(float(row[column]))
+                if not 1 <= value <= 9:
+                    raise ValueError("%s line %d: %s=%s is outside 1..9" % (path.name, line_number, column, value))
+                row[column] = value
+            row["label"] = (row.get("label") or "").strip().lower()
+            row["action"] = (row.get("action") or "").strip().upper()
+            if row["label"] not in LABELS:
+                raise ValueError("%s line %d: unknown label %r (use one of %s)" % (path.name, line_number, row["label"], ", ".join(LABELS)))
+            if row["action"] not in ACTIONS:
+                raise ValueError("%s line %d: unknown action %r (use one of %s)" % (path.name, line_number, row["action"], ", ".join(ACTIONS)))
+            row["rater_id"] = (row.get("rater_id") or "").strip() or path.stem
+            rows.append(row)
     return rows
 
 

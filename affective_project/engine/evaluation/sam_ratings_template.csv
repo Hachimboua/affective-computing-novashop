@@ -1,4 +1,4 @@
-msg_id,conversation_id,turn,text,rater_id,valence,arousal,dominance,label,action,comment
+﻿msg_id,conversation_id,turn,text,rater_id,valence,arousal,dominance,label,action,comment
 M1-01,M1,1,"Hi, how long does delivery usually take?",,,,,,,
 M1-02,M1,2,Thanks. And can I change my delivery address?,,,,,,,
 M1-03,M1,3,"Perfect, that is all I needed. Thank you!",,,,,,,

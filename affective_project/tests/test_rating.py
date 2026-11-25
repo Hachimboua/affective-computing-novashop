@@ -165,7 +165,9 @@ class RatingInputTests(unittest.TestCase):
     def test_spreadsheet_template_has_all_messages_and_blank_rating_cells(self):
         root = Path(__file__).resolve().parents[1]
         template = root / "engine" / "evaluation" / "sam_ratings_template.csv"
-        with template.open("r", encoding="utf-8", newline="") as stream:
+        # utf-8-sig: the template starts with a UTF-8 byte-order mark so that
+        # Excel shows Portuguese accents correctly when a volunteer opens it.
+        with template.open("r", encoding="utf-8-sig", newline="") as stream:
             rows = list(csv.DictReader(stream))
         self.assertEqual(len(rows), 88)
         self.assertTrue(all(row["text"] for row in rows))

@@ -199,3 +199,14 @@
   radius change on a sentence far from the origin; a tier change that needs a
   restart because the lexicon is loaded once). Every drill was then run before
   being written down.
+- While writing the step-by-step finishing guide, three practical traps were
+  found and fixed: (1) "Play scenario" in the kit interface does not reset the
+  engine, so the video script now presses "Reset session" before each scenario,
+  and `package.py` accepts several demo logs because each reset starts a new
+  log file; (2) Excel on some Windows language settings saves CSV with `;` and
+  a byte-order mark, so the tier sync and the rating loader now accept `,`,
+  `;` or tab, a BOM, blank (unrated) rows and a missing `rater_id` (taken from
+  the file name); the rating template now has a BOM so Excel shows accents
+  correctly, and its test reads it with `utf-8-sig` (same assertions);
+  (3) `rating_instructions.md` still listed the old label names and a different
+  command, which would have made spreadsheet ratings fail validation.

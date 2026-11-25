@@ -164,6 +164,13 @@ class PreprocessingTests(unittest.TestCase):
         self.assertEqual(updated_pt[1], "NEUTRAL")
         self.assertEqual(updated_phrase_en[1], "POSITIVE")
 
+    def test_sync_accepts_semicolon_separated_sheet_with_bom(self):
+        """Excel on Portuguese Windows saves 'CSV UTF-8' with ';' separators."""
+        from engine.tools.sync_lexicon_tiers import detect_delimiter
+        self.assertEqual(detect_delimiter("Lexicon;term;suggested tier;my tier"), ";")
+        self.assertEqual(detect_delimiter("Lexicon,term,suggested tier,my tier"), ",")
+        self.assertEqual(detect_delimiter("Lexicon\tterm\tsuggested tier\tmy tier"), "\t")
+
     def test_loader_rejects_question_marks_and_replacement_characters(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "bad.tsv"

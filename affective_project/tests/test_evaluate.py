@@ -89,6 +89,30 @@ class EvaluateScriptTests(unittest.TestCase):
                 evaluate.main(["--split", "dev", "--messages", str(messages), "--ratings-dir", str(ratings),
                                "--out", str(Path(folder) / "results")])
 
+    def test_spreadsheet_ratings_with_semicolons_bom_and_blank_rows(self):
+        """Excel on some Windows settings saves ';'-separated CSV with a BOM."""
+        with tempfile.TemporaryDirectory() as folder:
+            messages, ratings = _write_fixture(folder)
+            (ratings / "FIXTURE_B.csv").unlink()
+            lines = ["\ufeffmsg_id;conversation_id;turn;text;rater_id;valence;arousal;dominance;label;action;comment"]
+            for msg_id, v, a, d, label, action in FIXTURE_RATINGS["FIXTURE_B"][:3]:
+                lines.append("%s;FX;1;some text;;%d;%d;%d;%s;%s;" % (msg_id, v, a, d, label.upper(), action.lower()))
+            lines.append("FX-04;FX2;2;not rated yet;;;;;;;")
+            (ratings / "R7.csv").write_text("\r\n".join(lines) + "\r\n", encoding="utf-8")
+            rows = evaluate.load_ratings(ratings)
+            spreadsheet_rows = [row for row in rows if row["rater_id"] == "R7"]
+            self.assertEqual(len(spreadsheet_rows), 3)
+            self.assertEqual(spreadsheet_rows[0]["label"], "neutral")
+            self.assertEqual(spreadsheet_rows[0]["action"], "ANSWER")
+
+    def test_partly_filled_row_is_rejected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            messages, ratings = _write_fixture(folder)
+            with open(ratings / "FIXTURE_A.csv", "a", encoding="utf-8", newline="") as stream:
+                csv.writer(stream).writerow(["FX-01", "FX1", 1, "FIXTURE_A", 5, "", "", "neutral", "ANSWER", ""])
+            with self.assertRaises(ValueError):
+                evaluate.load_ratings(ratings)
+
     def test_ablation_config_is_restored(self):
         from engine import config
         before = config.NEGATION_FACTOR
