@@ -1,4 +1,4 @@
-"""Verify that the shared kit files remain unchanged from the Phase 0 baseline."""
+"""Verify protected kit files against their raw-byte Phase 0 hashes."""
 import hashlib
 from pathlib import Path
 import unittest
@@ -15,8 +15,7 @@ EXPECTED = {
 
 
 def _file_hash(path):
-    content = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-    return hashlib.sha256(content).hexdigest()
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _tree_hash(relative_path):

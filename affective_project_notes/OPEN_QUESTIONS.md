@@ -55,3 +55,8 @@
 - The student selected the optional voice channel, so implement it only after
   the Phase 6 integration gate passes. Skip face as directed by the
   continuation prompt.
+- The Phase A1 audit found that the Phase 0 protected blobs in `HEAD` already
+  matched the original ZIP, although 23 working-tree files had different raw
+  bytes. The rebase preceded `.gitattributes`, and Phase 3 had normalized the
+  test hash; the byte-copy, raw-byte test, local `core.autocrlf=false`, and ZIP
+  verifier now address the discrepancy without rewriting Git history.

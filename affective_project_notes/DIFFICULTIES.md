@@ -59,10 +59,10 @@
 
 ## Phase 3
 
-- The first full-suite run reported five protected-kit checksum mismatches
-  because the user's approved line-ending normalization changed raw file
-  hashes without changing content. Updated the checksum helper to normalize
-  line endings before hashing, preserving detection of substantive edits.
+- The first full-suite run reported protected-kit checksum mismatches while
+  the Windows working tree used converted line endings. The Phase 3 response
+  normalized line endings in the checksum helper, which hid byte differences
+  instead of restoring the original kit. Part A1 below records the correction.
 - A fresh Portuguese calm probe using “Estou tranquilo com a troca do
   produto.” was identified as Portuguese but had no affective term because
   `tranquilo` is not present in the current Portuguese lexicon. Tier
@@ -85,3 +85,15 @@
   affect estimate was below the Phase 4 clarification-confidence threshold.
   Updated the expected action to `ASK_CLARIFICATION` under `R4_UNCERTAIN`, and
   kept the reset-determinism assertion intact.
+
+## Part A1 - protected kit byte identity
+
+- The Git reflog shows a rebase before `.gitattributes` was added, while the
+  global `core.autocrlf` setting was enabled. The later
+  `c35c6ab Normalize line endings` commit recorded widespread line-ending
+  changes in project sources and notes. The Phase 3 checksum change then
+  normalized line endings, weakening the test and hiding raw-byte differences.
+  A direct comparison showed that the committed protected-file blobs already
+  matched the original ZIP, but 23 protected working-tree files did not.
+  Re-copied all 29 protected files byte-for-byte, returned the Phase 0 test to
+  raw hashes, disabled local `core.autocrlf`, and added a ZIP-based verifier.
