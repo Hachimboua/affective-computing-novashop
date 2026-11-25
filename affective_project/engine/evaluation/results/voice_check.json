@@ -1,0 +1,35 @@
+{
+  "available": true,
+  "estimates": {
+    "calm_clean": {
+      "activity": -0.241,
+      "confidence": 0.9
+    },
+    "agitated_clean": {
+      "activity": 0.253,
+      "confidence": 0.9
+    },
+    "calm_noisy": {
+      "activity": -0.064,
+      "confidence": 0.05
+    },
+    "agitated_noisy": {
+      "activity": 0.317,
+      "confidence": 0.05
+    },
+    "speaker_low": {
+      "activity": -0.095,
+      "confidence": 0.9
+    },
+    "speaker_high": {
+      "activity": -0.18,
+      "confidence": 0.9
+    }
+  },
+  "checks": {
+    "agitated_clean more activated than calm_clean": true,
+    "speaker_low and speaker_high both calm (activity < 0.1)": true,
+    "calm_noisy confidence lower than calm_clean": true,
+    "agitated_noisy confidence lower than agitated_clean": true
+  }
+}

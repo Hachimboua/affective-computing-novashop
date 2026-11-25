@@ -178,3 +178,24 @@
   the protected one-line logger output. Kept text-only result details stable
   by including voice/fusion timings only when an audio path is supplied and
   including a fused estimate only when voice analysis succeeds.
+
+## Reply fixes and Phases 9-14
+
+- After the clarification limit, the action was OFFER_HUMAN but the reply still
+  asked for more detail, because unsupported or very short messages returned a
+  fixed reply before the action was considered. The reply is now chosen from the
+  action for every language case.
+- Adding `context_intent` to every log entry made the long-message DETAILS line
+  657 characters, breaking the 650-character integration test. Instead of
+  loosening the test, the field is now logged only when the reply used it.
+- The evaluation code must live inside `engine/` (it is delivered), but the
+  starter baseline was only in the notes folder, which the engine must never
+  read. A byte copy of the kit's starter engine now lives in
+  `engine/evaluation/baselines/starter_engine.py`.
+- Metric formulas were checked against published worked examples and against
+  scipy, statsmodels and the `krippendorff` package before being written into
+  the tests, so the tests do not merely confirm the code against itself.
+- Two drafted live-change drills did not have the described effect (a neutral
+  radius change on a sentence far from the origin; a tier change that needs a
+  restart because the lexicon is loaded once). Every drill was then run before
+  being written down.

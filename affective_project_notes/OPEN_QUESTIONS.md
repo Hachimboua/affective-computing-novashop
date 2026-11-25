@@ -60,3 +60,8 @@
   bytes. The rebase preceded `.gitattributes`, and Phase 3 had normalized the
   test hash; the byte-copy, raw-byte test, local `core.autocrlf=false`, and ZIP
   verifier now address the discrepancy without rewriting Git history.
+- The anonymous rating files may be included in the delivered `code/`
+  folder so the evaluation can be reproduced (`package.py --ratings include`);
+  the consent form now says so, marked `[[CONFIRM]]`.
+- `engine/evaluation/results/voice_check.json` (voice check on the six kit
+  audio files) is part of the delivered code as evidence for the voice channel.

@@ -99,3 +99,30 @@ as worked examples. Do not tune on these messages before that confirmation.
    dominance 1-9, a listed label, and a listed action. Compare it with the
    CLI output schema in `rate.py`; all choices should match and the untouched
    template should remain blank.
+
+## Phase 9 — the evaluation pipeline
+
+### How it works
+
+- **Concept.** Compare what the engine estimates with what people perceive. Humans rate each message on the Self-Assessment Manikin (9-point valence, arousal, dominance) plus a label and the action they would choose. Their agreement with each other is the ceiling for the engine.
+- **Our design.** `engine/evaluation/evaluate.py` loads every rater file in `engine/evaluation/ratings/`, converts ratings with (r − 5)/4, averages raters per message, takes majority votes for label and action, then replays each conversation of the chosen split (dev or test) in order with a fresh engine. It does this for five variants: the kit's starter engine (`engine/evaluation/baselines/starter_engine.py`), the full engine, and three ablations (no negation, no sarcasm detection, no state smoothing), and compares them.
+- **Metrics** (`engine/evaluation/metrics.py`, plain Python): Pearson, Spearman, MAE, RMSE, sign accuracy, accuracy, macro-F1, confusion matrices, Krippendorff's alpha (interval), Fleiss' kappa, mean pairwise Pearson, percentile bootstrap intervals (seed 13), calibration bins. Each is tested on a hand-computed or published example in `tests/test_metrics.py` (Krippendorff 0.849, Fleiss 0.210).
+- **Outputs.** `engine/evaluation/results/<split>_summary.md`, `_metrics.json`, `_predictions.csv`, `_errors.csv` (15 largest errors with a suggested category and an empty `my_category` column).
+- **Honesty guard.** Without rating files the script stops with exit code 2 and writes nothing. The end-to-end test uses invented fixture ratings in a temporary folder only.
+- **Voice check.** `python -m engine.evaluation.evaluate --voice-check` checks the voice channel on the six kit audio files (no ratings needed): voice activity −0.24 for calm vs +0.25 for agitated, both calm speakers stay calm, noisy files get confidence 0.05.
+
+### How to change it
+
+1. Switch the split: `--split test` (only after tuning is finished on dev).
+2. Make missed escalations cost more: `MISSED_ESCALATION_COST` in `evaluate.py`.
+3. Add an ablation: one tuple in `VARIANTS` with the config values to override (restore is automatic in `patched_config`).
+4. More or fewer bootstrap samples: `--bootstrap 2000` (narrower Monte-Carlo noise, slower).
+5. Change the calibration bins: `edges` in `metrics.calibration_bins`.
+
+### Likely teacher questions
+
+- *Why majority vote and what about ties?* A label is only "gold" if most raters agree; ties are excluded from label/action metrics and counted (`ties_excluded`).
+- *Why compare with the starter engine?* It is the common starting point for every group; the difference is what our work added.
+- *Why replay whole conversations?* The state depends on earlier turns; scoring messages in isolation would test a different system.
+- *What does a wide bootstrap interval mean?* Few messages: the true value could be far from the estimate, so claims must be modest.
+- *Why plain Python instead of numpy for metrics?* The evaluation then runs on the teacher's machine even without numpy.

@@ -23,10 +23,16 @@ support action. Ratings are used to compare the system with human judgments.
   participant name or contact information.
 - Ratings and optional comments are stored locally in
   `engine/evaluation/ratings/<rater-id>.csv`.
-- Access to raw ratings: [[TODO: confirm who can access the local project files
-  with the teacher]]. Reports should use aggregated results and anonymous IDs.
-- Retention and deletion date: [[TODO: agree a date with the teacher and enter
-  it before collecting ratings]].
+- Access to raw ratings: only the student running this project and the course
+  teacher (for assessment) can access the rating files. They are kept on the
+  student's computer and in the student's private repository, and are not
+  shared with anyone else. Reports use only anonymous IDs and aggregated
+  results. [[CONFIRM with the teacher]]
+- The anonymous rating files may be included in the project delivered to the
+  teacher so that the evaluation can be reproduced. [[CONFIRM]]
+- Retention and deletion date: individual ratings are deleted at the end of
+  the assessment period, at the latest on [[DATE to agree with the teacher]].
+  Only anonymous averages and metrics remain in the report.
 - You may stop at any time and may ask for your ratings to be deleted by
   providing your rater ID to the student project owner before the data are
   aggregated. No identifying contact details are collected by this form.

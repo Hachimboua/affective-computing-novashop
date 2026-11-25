@@ -205,3 +205,24 @@
   102 tests passed. The clean-copy gate passed with 102 tests and 8/8
   scenarios. Fifteen new bilingual cases passed and were checked against
   `messages.csv` and earlier tests. No held-out engine output was run or shown.
+
+## 2026-11-25 - Reply fixes and Phases 9-14 (Claude chat session)
+
+- **What I asked for:** Complete the project from Phase 7: fix three reply
+  issues found in review, then build the evaluation pipeline and write the
+  ethics draft, report scaffold, video script, presentation outline, Q&A files
+  and the packaging script, without showing engine output for the 88
+  evaluation messages and without changing protected kit files.
+- **What the AI produced:** Action-aware bilingual replies, Portuguese payment
+  cues, earlier-topic fallback for follow-up replies and concrete next steps
+  (`replies.py`, `intents.py`, `tracker.py`, `engine.py`, `test_replies.py`);
+  `engine/evaluation/evaluate.py`, `metrics.py`, a copy of the kit starter
+  engine as baseline, `test_metrics.py`, `test_evaluate.py`; `ethics.md`,
+  consent-form wording, `report_draft.md`, `contribution_statement.md`,
+  `video/script.md`, `captions.srt`, `presentation/outline.md`, six Q&A files,
+  topic 3 and 5 study notes, `tools/package.py`, a folder option in
+  `verify_kit.py`, `FINAL_CHECKLIST.md` and the STATUS update. Verified on
+  Python 3.9 (no numpy) and 3.13 (numpy): 131 tests, 8 scenarios, 0 kit
+  mismatches, packaging dry run.
+- **What I changed:**
+- **How I verified it:**

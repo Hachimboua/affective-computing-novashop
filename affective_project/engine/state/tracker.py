@@ -36,6 +36,19 @@ class StateTracker:
         self.resolved = False
 
     @property
+    def context_intent(self):
+        """Return the latest specific support intent before the current turn.
+
+        Greetings, thanks and human requests are skipped because they do not
+        describe the customer's problem. Returns None when there is none.
+        """
+        skip = ("UNKNOWN", "GREETING", "CLOSING_THANKS", "HUMAN_REQUEST")
+        for item in reversed(self.history[:-1]):
+            if item["intent"] not in skip:
+                return item["intent"]
+        return None
+
+    @property
     def context_valence(self):
         """Return smoothed valence for context-sensitive perception."""
         return self.state["valence"] if self.state is not None else 0.0

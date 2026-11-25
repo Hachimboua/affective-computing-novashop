@@ -191,3 +191,11 @@ action reachability and a 90% minimum pass rate, and avoids `messages.csv`.
    `engine/policy/replies.py`, then run `py -3.12 -m unittest discover -s tests
    -p 'test_policy.py'` to verify the reply remains specific, safe, and
    deterministic.
+
+## Reply consistency (after the Phase 4 review)
+
+- **Action-aware bilingual replies.** When the language is not English or Portuguese (or the message is too short to tell), `_bilingual_reply` in `engine/policy/replies.py` chooses the text from the action: OFFER_HUMAN offers a person, ESCALATE announces an urgent handover, and only clarification asks for more detail. Before this fix, the third unclear message ("k") was OFFER_HUMAN but still asked for more detail.
+- **Conversation topic for follow-ups.** `StateTracker.context_intent` returns the latest specific intent from earlier turns. If the current message has none ("nobody tells me anything"), the reply uses the earlier topic (e.g. delivery: ask for the order number and tracking). It is logged as `details.context_intent` only when it was used.
+- **Portuguese payment.** `intents.py` now recognises *paguei, cobrado, cobrada, cobraram, debitado, débito* and *pagamos duas vezes*, so "paguei duas vezes" gets the payment reply.
+- **No generic filler.** The UNKNOWN next step now asks for what happened and the order or product, instead of "I can help with a NovaShop question".
+- Tests: `tests/test_replies.py` (7 tests, new sentences only).

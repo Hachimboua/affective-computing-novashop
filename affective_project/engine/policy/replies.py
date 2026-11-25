@@ -50,8 +50,8 @@ _EN_STEPS = {
         "Tell me what went wrong; if it is about an order, include its order number.",
     ),
     "UNKNOWN": (
-        "I can help with a NovaShop question.",
-        "Tell me what you would like to know, and I can suggest a next step.",
+        "Tell me what happened and, if it concerns an order, share the order number so I can suggest the next step.",
+        "Could you tell me which order or product this is about? Then I can point you to the right next step.",
     ),
 }
 _PT_STEPS = {
@@ -104,8 +104,8 @@ _PT_STEPS = {
         "Diga-me o que correu mal; se for sobre uma encomenda, inclua o respetivo número.",
     ),
     "UNKNOWN": (
-        "Posso ajudar com uma questão da NovaShop.",
-        "Diga-me o que gostaria de saber e posso sugerir um próximo passo.",
+        "Diga-me o que aconteceu e, se for sobre uma encomenda, indique o número para eu sugerir o próximo passo.",
+        "Pode dizer-me de que encomenda ou produto se trata? Assim indico-lhe o próximo passo certo.",
     ),
 }
 _EN_PROBLEMS = {
@@ -227,15 +227,36 @@ def _step(steps, intent, turn_index, subject):
     return template.format(subject=subject)
 
 
-def render_reply(action, intent, language, turn_index, entities=None, flags=None):
-    """Render a two-variant reply in a supported language or bilingually."""
-    entities = entities or {}
-    flags = set(flags or ())
-    if (
-        "unsupported_language" not in flags
-        and language not in ("en", "pt")
-        and "short_message" in flags
-    ):
+_BILINGUAL_OFFER_HUMAN = (
+    "I'm an automated assistant. Would you like me to connect you with a "
+    "person? / Sou um assistente automatizado. Quer que o encaminhe para "
+    "uma pessoa?",
+    "I'm an automated assistant and can ask a person from our team to help "
+    "you. / Sou um assistente automatizado e posso pedir a uma pessoa da "
+    "equipa que o ajude.",
+)
+_BILINGUAL_ESCALATE = (
+    "I'm an automated assistant. I am passing this to a person for urgent "
+    "review. / Sou um assistente automatizado. Vou encaminhar isto para uma "
+    "pessoa com urgência.",
+    "I'm an automated assistant. A person from our team should review this "
+    "urgently. / Sou um assistente automatizado. Uma pessoa da equipa deve "
+    "analisar isto com urgência.",
+)
+
+
+def _bilingual_reply(action, flags, turn_index):
+    """Reply in English and Portuguese when the message language is unclear.
+
+    The action decides the wording: a handoff or escalation must never be
+    rendered as a request for more detail, because the reply would then
+    contradict the action shown in the interface and the log.
+    """
+    if action == "ESCALATE" and "safety" not in flags:
+        return _variant(_BILINGUAL_ESCALATE, turn_index)
+    if action == "OFFER_HUMAN":
+        return _variant(_BILINGUAL_OFFER_HUMAN, turn_index)
+    if "unsupported_language" not in flags and "short_message" in flags:
         return _variant(
             (
                 "Could you tell me a little more so I can help? / "
@@ -245,15 +266,40 @@ def render_reply(action, intent, language, turn_index, entities=None, flags=None
             ),
             turn_index,
         )
-    if "unsupported_language" in flags or language not in ("en", "pt"):
-        return (
-            "Sorry, I can understand English or Portuguese. Please write in one "
-            "of those languages. I'm an automated assistant and can offer a "
-            "human handoff. / Desculpe, só consigo compreender inglês ou "
-            "português. Escreva numa dessas línguas. Sou um assistente "
-            "automatizado e posso oferecer o apoio de uma pessoa."
-        )
+    return (
+        "Sorry, I can understand English or Portuguese. Please write in one "
+        "of those languages. I'm an automated assistant and can offer a "
+        "human handoff. / Desculpe, só consigo compreender inglês ou "
+        "português. Escreva numa dessas línguas. Sou um assistente "
+        "automatizado e posso oferecer o apoio de uma pessoa."
+    )
 
+
+def render_reply(
+    action,
+    intent,
+    language,
+    turn_index,
+    entities=None,
+    flags=None,
+    context_intent=None,
+):
+    """Render a two-variant reply in a supported language or bilingually.
+
+    ``context_intent`` is the most recent specific intent earlier in the
+    conversation. It is used only when the current message has no intent of
+    its own, so a follow-up such as "nobody tells me anything" still gets a
+    next step about the problem the customer raised before.
+    """
+    entities = entities or {}
+    flags = set(flags or ())
+    if intent == "UNKNOWN" and context_intent:
+        intent = context_intent
+    unsafe_language = (
+        "unsupported_language" in flags or language not in ("en", "pt")
+    )
+    if unsafe_language and not (action == "ESCALATE" and "safety" in flags):
+        return _bilingual_reply(action, flags, turn_index)
     subject = _subject(entities, language, intent)
     if "safety" in flags and action == "ESCALATE":
         if language == "pt":

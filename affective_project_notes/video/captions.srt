@@ -1,0 +1,23 @@
+1
+00:00:00,000 --> 00:00:30,000
+NovaShop affective engine, running offline in the unchanged course interface (python run_app.py). For each message: valence, activity, dominance, a state over time, and one of six actions.
+
+2
+00:00:30,000 --> 00:01:25,000
+M1, calm customer: points stay near the centre; simple answers; the thank-you at the end closes positively (rule R3: closing intent, positive valence, no sarcasm).
+
+3
+00:01:25,000 --> 00:02:25,000
+M2, growing frustration: points move left and up; the smoothed state crosses the human-offer threshold; the lawyer threat escalates (rule R2: explicit legal signal).
+
+4
+00:02:25,000 --> 00:03:15,000
+M3, explicit requests: asking for a person is handled by rule R1; the consumer-protection threat escalates even though the message starts with "Thank you".
+
+5
+00:03:15,000 --> 00:04:15,000
+M4, ambiguity and robustness: "ok" has low confidence, so the engine asks for clarification; sarcasm is flagged and never closes; the Portuguese closing is answered in Portuguese.
+
+6
+00:04:15,000 --> 00:05:00,000
+Session log and exported .txt: every step with the rule that fired. Voice channel: same text, calm voice gives activity -0.19, agitated voice +0.17; noisy audio has low confidence and falls back to text.

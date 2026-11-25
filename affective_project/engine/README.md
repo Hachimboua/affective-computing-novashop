@@ -81,10 +81,41 @@ python -m engine.evaluation.rate --rater <anonymous-rater-id>
 ```
 
 Use it only with informed, consenting raters. It writes their SAM judgments
-under `engine/evaluation/ratings/`. No real rating files are currently
-available. The model-metrics evaluation pipeline is a later Phase 9 task and
-is not available yet; do not report model metrics until that pipeline has
-been implemented and real ratings are supplied.
+under `engine/evaluation/ratings/` (one CSV per anonymous rater).
+
+Compare the engine with the ratings (tune on `dev` only; `test` gives the
+honest numbers):
+
+```text
+python -m engine.evaluation.evaluate --split dev
+python -m engine.evaluation.evaluate --split test
+```
+
+For each split this replays every conversation in order with a fresh engine
+and compares five variants: the kit's starter engine (baseline, copied in
+`engine/evaluation/baselines/`), the full engine, and three ablations
+(no negation, no sarcasm detection, no state smoothing). It reports Pearson
+and Spearman correlation, MAE and RMSE for valence, activity and dominance
+(with 95% bootstrap intervals), label and action accuracy and macro-F1,
+confusion matrices, a cost-weighted action error (a missed escalation costs
+the most), confidence calibration, latency, and agreement between raters
+(Krippendorff's alpha, mean pairwise Pearson, Fleiss' kappa; two or more
+raters needed). Results go to `engine/evaluation/results/`:
+`<split>_summary.md`, `<split>_metrics.json`, `<split>_predictions.csv` and
+`<split>_errors.csv` (the 15 largest errors, with an empty `my_category`
+column for the error analysis). Without rating files the command stops with
+exit code 2 and writes nothing. It never invents ratings.
+
+The metric formulas live in `engine/evaluation/metrics.py` (plain Python, no
+numpy) and are checked against hand-computed examples in
+`tests/test_metrics.py`.
+
+Check the voice channel against the expectations in
+`assets/audio/README.txt` (needs numpy; no ratings needed):
+
+```text
+python -m engine.evaluation.evaluate --voice-check
+```
 
 ## Lexicon tier synchronization
 

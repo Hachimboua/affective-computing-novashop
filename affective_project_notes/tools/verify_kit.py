@@ -36,8 +36,13 @@ def _sha256(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def verify(zip_path):
-    """Return mismatches between protected ZIP entries and project files."""
+def verify(zip_path, project_root=None):
+    """Return mismatches between protected ZIP entries and project files.
+
+    ``project_root`` defaults to the working project; the packaging script
+    passes the staged ``code/`` folder so the delivered copy is checked too.
+    """
+    root = Path(project_root) if project_root is not None else PROJECT_ROOT
     with zipfile.ZipFile(zip_path, "r") as archive:
         archive_files = {}
         for entry in archive.infolist():
@@ -49,17 +54,17 @@ def verify(zip_path):
 
         project_files = {}
         for relative in PROTECTED_FILES:
-            path = PROJECT_ROOT.joinpath(*PurePosixPath(relative).parts)
+            path = root.joinpath(*PurePosixPath(relative).parts)
             if path.is_file():
                 project_files[relative] = path
         for tree in PROTECTED_TREES:
-            tree_root = PROJECT_ROOT / tree
+            tree_root = root / tree
             if not tree_root.exists():
                 continue
             for path in tree_root.rglob("*"):
                 if not path.is_file():
                     continue
-                relative = path.relative_to(PROJECT_ROOT).as_posix()
+                relative = path.relative_to(root).as_posix()
                 if _is_protected(relative):
                     project_files[relative] = path
 

@@ -93,6 +93,7 @@ class Engine:
             | set(decision["flags"])
             | audio_flags
         )
+        context_intent = self.state_tracker.context_intent
         reply = render_reply(
             action,
             estimate.intent,
@@ -100,6 +101,7 @@ class Engine:
             state["turn"],
             estimate.entities,
             flags,
+            context_intent=context_intent,
         )
         policy_reply_ms = (time.perf_counter() - stage_started) * 1000.0
         stage_started = time.perf_counter()
@@ -174,6 +176,10 @@ class Engine:
             "timing_ms": timing_ms,
             "engine_version": "1.0",
         }
+        if context_intent is not None and estimate.intent == "UNKNOWN":
+            # Logged only when the reply actually used the earlier intent,
+            # which keeps the one-line log entry short.
+            details["context_intent"] = context_intent
         if voice_estimate is not None:
             details["fused"] = {
                 "v": round(float(estimate.valence), 3),
