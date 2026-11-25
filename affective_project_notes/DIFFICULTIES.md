@@ -99,3 +99,14 @@
   matched the original ZIP, but 23 protected working-tree files did not.
   Re-copied all 29 protected files byte-for-byte, returned the Phase 0 test to
   raw hashes, disabled local `core.autocrlf`, and added a ZIP-based verifier.
+
+## Part A3 - short and shouted language
+
+- Short Latin-script messages and punctuation-only messages could be sent to
+  the unsupported-language reply when they lacked language evidence. They now
+  use the short-message clarification instead; longer unsupported-language
+  detection remains unchanged. Added all-caps English lexicon regressions and
+  context-aware human handoff for a short shout during sustained distress.
+- Added the missing `unbelievable`, `nonsense`, and `this is a joke` entries
+  with provisional tiers, and synchronized those additions into the review
+  sheet. Existing `ridiculous` and `absurd` were already present.

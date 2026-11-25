@@ -148,6 +148,20 @@ def render_reply(action, intent, language, turn_index, entities=None, flags=None
     """Render a two-variant reply in a supported language or bilingually."""
     entities = entities or {}
     flags = set(flags or ())
+    if (
+        "unsupported_language" not in flags
+        and language not in ("en", "pt")
+        and "short_message" in flags
+    ):
+        return _variant(
+            (
+                "Could you tell me a little more so I can help? / "
+                "Pode dizer-me um pouco mais para eu poder ajudar?",
+                "Please share a little more detail. / "
+                "Partilhe um pouco mais de informação, por favor.",
+            ),
+            turn_index,
+        )
     if "unsupported_language" in flags or language not in ("en", "pt"):
         return (
             "Sorry, I can understand English or Portuguese. Please write in one "

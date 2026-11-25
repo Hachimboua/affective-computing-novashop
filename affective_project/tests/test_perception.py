@@ -565,6 +565,25 @@ class TextEstimateTests(unittest.TestCase):
                     result.confidence, config.UNSUPPORTED_CONFIDENCE_CAP
                 )
 
+    def test_all_caps_english_terms_remain_supported(self):
+        examples = (
+            ("UNBELIEVABLE!!!", "unbelievable"),
+            ("THIS IS RIDICULOUS!!!", "ridiculous"),
+            ("THIS IS ABSURD!!!", "absurd"),
+            ("THIS IS NONSENSE!!!", "nonsense"),
+            ("THIS IS A JOKE!!!", "this is a joke"),
+        )
+        self.assert_new_sentences([text for text, _ in examples])
+        lexicons = load_lexicons()
+        for text, expected_term in examples:
+            with self.subTest(text=text):
+                processed = preprocess(text)
+                language, _, flags = identify_language(processed.tokens)
+                self.assertEqual(language, "en")
+                self.assertNotIn("unsupported_language", flags)
+                _, hits = match_clause(processed.clauses[0], language, lexicons)
+                self.assertIn(expected_term, [hit.entry.term for hit in hits])
+
     def test_foreign_stopwords_override_borrowed_english_phrase(self):
         examples = (
             ("Ich bin great customer service.", "de"),

@@ -12,6 +12,25 @@ def _contains_any(text, phrases):
     )
 
 
+def _word_count(text):
+    return len(
+        re.findall(r"[^\W\d_]+(?:['’][^\W\d_]+)*", str(text), re.UNICODE)
+    )
+
+
+def _short_shout_in_distress(context):
+    state = context["state"]
+    short_shout = (
+        _word_count(context["text"]) <= config.SHOUTED_MESSAGE_MAX_TOKENS
+        and bool({"caps", "exclamation"} & context["flags"])
+    )
+    return (
+        short_shout
+        and state["valence"] <= config.EMPATHY_V
+        and state["neg_streak"] >= config.HUMAN_STREAK
+    )
+
+
 def _safety(context):
     if "safety" in context["flags"]:
         return (
@@ -120,6 +139,8 @@ def _uncertain(context):
         )
     if state["acknowledgement_after_empathy"]:
         return None
+    if _short_shout_in_distress(context):
+        return None
     if "unsupported_language" in context["flags"]:
         return (
             "ASK_CLARIFICATION",
@@ -172,7 +193,7 @@ def _human_offer(context):
             state["neg_streak"] >= config.HUMAN_STREAK
             or state["trend"] <= config.TREND_WORSENING_THRESHOLD
         )
-    ) or state["repeated_issue"]
+    ) or state["repeated_issue"] or _short_shout_in_distress(context)
     if not needs_human:
         return None
     offered_recently = (

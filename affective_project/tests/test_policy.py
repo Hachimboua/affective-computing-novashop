@@ -8,6 +8,18 @@ from engine.engine import Engine
 
 
 class PolicyTests(unittest.TestCase):
+    def assert_new_sentences(self, sentences):
+        messages_path = (
+            Path(__file__).resolve().parent.parent
+            / "engine"
+            / "evaluation"
+            / "data"
+            / "messages.csv"
+        )
+        with messages_path.open("r", encoding="utf-8", newline="") as stream:
+            evaluation_texts = {row["text"] for row in csv.DictReader(stream)}
+        self.assertFalse(evaluation_texts.intersection(sentences))
+
     def test_thirty_message_action_rehearsal(self):
         examples = (
             ("I might hurt myself tonight; I need help.", "ESCALATE"),
@@ -142,6 +154,36 @@ class PolicyTests(unittest.TestCase):
             config.NEUTRAL_CONFIDENCE
             * boundary_result["details"]["lang_confidence"],
         )
+
+    def test_short_latin_messages_request_clarification_not_language(self):
+        examples = ("meh", "eh", "??", "uhh", "k", "je suis", "ich bin")
+        self.assert_new_sentences(examples)
+        for text in examples:
+            with self.subTest(text=text):
+                result = Engine().process(text)
+                self.assertEqual(result["action"], "ASK_CLARIFICATION")
+                self.assertIn("short_message", result["flags"])
+                self.assertNotIn("unsupported_language", result["flags"])
+                self.assertNotIn(
+                    "Please write in one of those languages.", result["reply"]
+                )
+
+    def test_short_shout_in_negative_context_offers_human(self):
+        conversation = (
+            "Hello, I'm checking on my tablet order.",
+            "It's now a week late.",
+            "This is getting really annoying, nobody tells me anything.",
+            "I'm absolutely furious, this is the worst service ever!!!",
+            "UNBELIEVABLE. STILL NOTHING!!!",
+        )
+        self.assert_new_sentences(conversation)
+        engine = Engine()
+        for text in conversation[:-1]:
+            engine.process(text)
+        result = engine.process(conversation[-1])
+        self.assertIn(result["action"], ("OFFER_HUMAN", "ESCALATE"))
+        self.assertEqual(result["details"]["lang"], "en")
+        self.assertNotIn("unsupported_language", result["flags"])
 
     def test_explicit_legal_cue_overrides_positive_closing_language(self):
         result = Engine().process(

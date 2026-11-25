@@ -10,6 +10,7 @@ LOW_CONFIDENCE_THRESHOLD = 0.35  # Raising it flags more estimates; lowering it 
 UNSUPPORTED_CONFIDENCE_CAP = 0.20  # Raising it trusts unsupported text more; lowering it favors clarification.
 NEUTRAL_CONFIDENCE = 0.55  # Raising it trusts neutral intent more; lowering it treats neutral input as less certain.
 SHORT_TOKEN_LIMIT = 2  # Raising it flags more short messages; lowering it misses terse ambiguity.
+SHOUTED_MESSAGE_MAX_TOKENS = 4  # Raising it treats longer emphatic turns as short shouts; lowering it narrows context overrides.
 SHORT_CONFIDENCE_FACTOR = 0.55  # Raising it penalizes short text less; lowering it asks for clarification more often.
 UNKNOWN_TOKEN_PENALTY = 0.25  # Raising it penalizes unknown vocabulary more; lowering it tolerates unseen words.
 MIXED_LANGUAGE_CONFIDENCE_FACTOR = 0.75  # Raising it trusts mixed text more; lowering it favors a clarification.

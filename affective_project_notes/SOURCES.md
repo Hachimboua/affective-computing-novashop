@@ -20,13 +20,16 @@ English and Portuguese single words and phrases plus emoji/emoticon entries.
 Record any later human review and changes separately; do not describe these
 initial estimates as a sourced or validated external lexicon.
 
-The [review sheet](./lexicon_review_sheet.csv) exports all 568 English and
+The [review sheet](./lexicon_review_sheet.csv) exports all 571 English and
 Portuguese word and phrase entries, grouped by suggested tier. Tier suggestions
 are meaning-based and remain unreviewed; the engine uses the suggestions until
 the student supplies a `my tier` choice. The legacy V/A/D and `my value` columns
 are retained for reference and do not drive runtime values. `Review flag` marks
 potentially contradictory legacy VAD entries; none were changed during tiering.
 Per-coordinate overrides in the TSVs remain blank unless explicitly set.
+Part A3 added `unbelievable` (FRUSTRATION), `nonsense` (PROBLEM), and the
+phrase `this is a joke` (FRUSTRATION). Existing `ridiculous` and `absurd` remain
+in PROBLEM. These suggestions are also unreviewed.
 
 After editing `my tier`, run
 `py -3.12 -m engine.tools.sync_lexicon_tiers <path-to-sheet>` from the

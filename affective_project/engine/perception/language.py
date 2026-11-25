@@ -219,6 +219,8 @@ def identify_language(tokens):
     words = [token.normalized for token in tokens if token.kind == "word"]
     scripts = [_letter_script(char) for word in words for char in word if char.isalpha()]
     if not scripts:
+        if len(words) <= config.SHORT_TOKEN_LIMIT:
+            return "unknown", config.LANG_UNKNOWN_CONFIDENCE, []
         return "unknown", config.LANG_UNKNOWN_CONFIDENCE, ["unsupported_language"]
 
     script_language = None
@@ -239,6 +241,13 @@ def identify_language(tokens):
         language: stopword_scores[language] + lexicon_scores[language]
         for language in SUPPORTED_LANGUAGES
     }
+    short_latin_message = (
+        len(words) <= config.SHORT_TOKEN_LIMIT
+        and all(script == "LATIN" for script in scripts)
+    )
+    if short_latin_message and not any(supported_scores.values()):
+        return "unknown", config.LANG_UNKNOWN_CONFIDENCE, []
+
     unsupported_scores = {
         language: sum(word in stopwords for word in words)
         for language, stopwords in UNSUPPORTED_LATIN_STOPWORDS.items()

@@ -211,6 +211,7 @@ careless	ANGER
 incompetent	ANGER			
 ignored	FRUSTRATION			
 unanswered	FRUSTRATION			
+unbelievable	FRUSTRATION			
 forgotten	FRUSTRATION			
 abandoned	FRUSTRATION			
 cheated	FRUSTRATION			
@@ -222,6 +223,7 @@ dishonest	PROBLEM
 unfair	PROBLEM			
 ridiculous	PROBLEM			
 absurd	PROBLEM			
+nonsense	PROBLEM			
 pathetic	PROBLEM			
 disgusting	ANGER			
 disgraceful	ANGER			
