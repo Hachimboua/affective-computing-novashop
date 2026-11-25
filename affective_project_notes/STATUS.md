@@ -27,8 +27,8 @@
 | Phase | Status | Commit |
 |---|---|---|
 | 5 — robustness and reply quality | Done | `04c0ea9` |
-| 6 — integration and documentation | Done | — |
-| 7 — voice channel | Done | — |
+| 6 — integration and documentation | Done | `7b5f787` |
+| 7 — voice channel | Done | `3b3c038` |
 | 8 — face channel | Skipped as directed | — |
 | 9 — evaluation pipeline | Not started; no real ratings available | — |
 | 10 — ethics and limits | Not started | — |
