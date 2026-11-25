@@ -259,12 +259,17 @@ TIER_VAD = {
     "POSITIVE": (0.50, 0.10, 0.25),
     "JOY": (0.80, 0.55, 0.40),
 }
+LABEL_D_WEIGHT = 0.50  # Raising it lets perceived control affect labels more; lowering it emphasizes valence and activity.
 LABEL_NEUTRAL_RADIUS = 0.18  # Raising it selects neutral more often; lowering it assigns emotion labels more readily.
-LABEL_VALENCE_POSITIVE = 0.35  # Raising it requires stronger positivity for a positive label; lowering it is more permissive.
-LABEL_VALENCE_NEGATIVE = -0.35  # Lowering it requires stronger negativity; raising it labels more messages negative.
-LABEL_ACTIVITY_HIGH = 0.35  # Raising it reserves activated labels for stronger arousal; lowering it broadens them.
-LABEL_ACTIVITY_LOW = -0.35  # Lowering it requires calmer affect for low-activity labels; raising it broadens them.
-LABEL_CONTROL_HIGH = 0.10  # Raising it needs more control for anger; lowering it labels more activation as anger.
+LABEL_PROTOTYPES = {
+    "anger": (-0.70, 0.60, 0.30),
+    "frustration": (-0.55, 0.35, 0.10),
+    "fear": (-0.60, 0.55, -0.50),
+    "sadness": (-0.60, -0.40, -0.35),
+    "calm": (0.40, -0.45, 0.25),
+    "joy": (0.75, 0.50, 0.40),
+    "neutral": (0.00, 0.00, 0.00),
+}
 WORD_SALIENCE = 1.00  # Raising it gives single words more influence; lowering it favors message-level cues.
 PHRASE_SALIENCE = 1.25  # Raising it trusts multiword cues more; lowering it reduces phrase dominance.
 

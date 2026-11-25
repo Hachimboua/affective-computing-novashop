@@ -56,3 +56,16 @@
   retained optional per-coordinate overrides, and made meaning-based tier
   suggestions available for student review and synchronization. Suggestions
   remain unreviewed; no evaluation-message outputs were used.
+
+## Phase 3
+
+- The first full-suite run reported five protected-kit checksum mismatches
+  because the user's approved line-ending normalization changed raw file
+  hashes without changing content. Updated the checksum helper to normalize
+  line endings before hashing, preserving detection of substantive edits.
+- A fresh Portuguese calm probe using “Estou tranquilo com a troca do
+  produto.” was identified as Portuguese but had no affective term because
+  `tranquilo` is not present in the current Portuguese lexicon. Tier
+  assignments require the student's review, so no lexicon tier was added or
+  changed; the regression set uses existing supported terms and this coverage
+  gap remains a candidate for review.

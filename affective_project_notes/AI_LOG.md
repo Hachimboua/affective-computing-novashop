@@ -10,8 +10,8 @@
   for later comparison; proposed an architecture and initial thresholds; added
   a new `tests/test_kit_unchanged.py` checksum test. See `KIT_NOTES.md`,
   `kit_checksums.txt`, and `evaluation/baseline_logs/`.
-- **What I changed:** 
-- **How I verified it:** 
+- **What I changed:**
+- **How I verified it:**
 
 ## 2026-11-25 - Phase 1 - Topic 5
 
@@ -26,8 +26,8 @@
   `engine/evaluation/rate.py` CLI and spreadsheet template, and drafted consent
   and rating instructions in `affective_project_notes/ethics/`. Added focused
   tests in `tests/test_rating.py`.
-- **What I changed:** 
-- **How I verified it:** 
+- **What I changed:**
+- **How I verified it:**
 
 ## 2026-11-25 - Phase 2 - Topic 1
 
@@ -40,7 +40,7 @@
   focused tests, source notes, and engine run/test instructions. The public
   engine contract remains in place; action policy and replies remain
   temporary. Added the Phase 2 topic notes and documented remaining limits.
-- **What I changed:** 
+- **What I changed:**
 - **How I verified it:** On Python 3.12.10, all 24 discovered tests passed.
   All eight mandatory/practice scenarios passed the contract/integration
   check; only pass/fail status was displayed. No evaluation-message V/A/labels
@@ -56,7 +56,7 @@
   sarcasm event and idiom cues, focused tests and docs. Reworded the six
   requested test-split messages while preserving their conversation IDs,
   turns, and case types, and synchronized the blank rating template.
-- **What I changed:** 
+- **What I changed:**
 - **How I verified it:** All 28 tests passed on Python 3.12.10. The six
   rewritten rows remain in the test split and are no longer near-copies of the
   scenario messages by the similarity check; the dataset and rating template
@@ -117,3 +117,14 @@
   partial coordinate overrides and `my tier`/suggestion fallback. The engine
   does not reference the review sheet or sync script. No engine output for the
   88 evaluation messages was produced or displayed.
+
+## 2026-11-25 - Phase 3 - Topic 2
+
+- **What I asked for:** Replace threshold-based emotion labels with nearest
+  V/A/D prototypes using dominance weight 0.5 and a neutral radius; include
+  the runner-up and distances; test the requested new sentences; keep the
+  88-message engine output hidden.
+- **What the AI produced:** Added the affect-space conversion and prototype
+  classifier, configured the seven kit labels, added focused and
+  generalization regressions, and drafted the Topic 2 study notes. A
+  Portuguese calm-lexicon coverage gap remains documented for student review.

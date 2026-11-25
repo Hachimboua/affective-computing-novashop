@@ -5,6 +5,7 @@ import tempfile
 import unittest
 
 from engine import config
+from engine.affect.space import clamp, classify_vad, sam_to_unit, unit_to_sam
 from engine.engine import Engine
 from engine.perception.language import STOPWORDS, identify_language
 from engine.perception.lexicon import (
@@ -166,7 +167,7 @@ class PreprocessingTests(unittest.TestCase):
     def test_loader_rejects_question_marks_and_replacement_characters(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "bad.tsv"
-            for invalid in ("term?bad", "term\ufffdbad"):
+            for invalid in ("term\x3fbad", "term\ufffdbad"):
                 with self.subTest(invalid=invalid):
                     path.write_text(
                         "%s\t0.10\t0.20\t0.30\n" % invalid,
@@ -382,6 +383,81 @@ class TextEstimateTests(unittest.TestCase):
             {"neutral", "calm", "joy", "anger", "frustration", "fear", "sadness"},
         )
 
+    def test_prototype_points_map_to_their_own_labels(self):
+        for label, point in config.LABEL_PROTOTYPES.items():
+            with self.subTest(label=label):
+                self.assertEqual(_label_for(*point), label)
+
+    def test_neutral_radius_and_runner_up_distances(self):
+        result = classify_vad(0.01, -0.02, 0.01)
+        self.assertEqual(result["label"], "neutral")
+        self.assertIsNotNone(result["second_label"])
+        self.assertAlmostEqual(result["label_distance"], (0.00055) ** 0.5)
+        self.assertGreater(result["second_distance"], result["label_distance"])
+
+    def test_added_prototype_can_be_selected(self):
+        prototypes = dict(config.LABEL_PROTOTYPES)
+        prototypes["curious"] = (0.25, 0.30, 0.15)
+        result = classify_vad(0.25, 0.30, 0.15, prototypes)
+        self.assertEqual(result["label"], "curious")
+
+    def test_sam_conversion_and_clamping(self):
+        for rating in (1, 3, 5, 7, 9):
+            self.assertAlmostEqual(unit_to_sam(sam_to_unit(rating)), rating)
+        self.assertEqual(sam_to_unit(10), 1.25)
+        self.assertEqual(unit_to_sam(1.25), 10.0)
+        self.assertEqual(clamp(-4), -1.0)
+        self.assertEqual(clamp(4), 1.0)
+
+    def test_phase_three_sentences_map_to_expected_labels(self):
+        examples = (
+            ("this keeps happening, it's getting irritating", "frustration"),
+            ("No worries, I'm relaxed about it", "calm"),
+            ("I'm exhausted and sad about this", "sadness"),
+            ("I'm terrified my card was stolen", "fear"),
+            ("I AM FURIOUS!!!", "anger"),
+            ("I love it, best purchase ever!", "joy"),
+            ("What is the warranty period?", "neutral"),
+        )
+        self.assert_new_sentences([text for text, _ in examples])
+        for text, expected in examples:
+            with self.subTest(text=text):
+                self.assertEqual(estimate(text).label, expected)
+
+    def test_phase_three_generalization_labels(self):
+        examples = (
+            ("The repeated billing error is wearing me down.", "sadness"),
+            ("I feel peaceful now that the parcel is here.", "calm"),
+            ("I'm delighted with how sturdy this mug feels.", "joy"),
+            ("This makes me furious; the seal was broken twice.", "anger"),
+            ("I'm worried that my payment details are exposed.", "fear"),
+            ("I feel drained after waiting through another long queue.", "sadness"),
+            ("Could you explain the warranty coverage?", "neutral"),
+            ("It's mildly annoying that the receipt is missing again.", "frustration"),
+            ("Fiquei muito feliz com a ajuda recebida!", "joy"),
+            ("Fiquei contente com o resultado, sem qualquer pressa.", "calm"),
+            ("Estou cansado de repetir o mesmo pedido.", "sadness"),
+            ("Tenho medo de uma cobranca duplicada.", "fear"),
+            ("Estou furioso com o segundo erro na fatura.", "anger"),
+            ("A embalagem chegou amassada e fiquei desanimada.", "sadness"),
+            ("Qual e o prazo da garantia deste aparelho?", "neutral"),
+        )
+        self.assert_new_sentences([text for text, _ in examples])
+        for text, expected in examples:
+            with self.subTest(text=text):
+                result = estimate(text)
+                self.assertEqual(result.label, expected)
+                self.assertTrue(
+                    all(
+                        -1.0 <= value <= 1.0
+                        for value in (
+                            result.valence,
+                            result.activity,
+                            result.dominance,
+                        )
+                    )
+                )
+
     def test_negation_shifts_polarity_without_a_full_flip(self):
         good = estimate("good")
         not_good = estimate("not good")
@@ -521,6 +597,8 @@ class TextEstimateTests(unittest.TestCase):
             "details",
         ):
             self.assertIn(key, first)
+        for key in ("second_label", "label_distance", "second_distance"):
+            self.assertIn(key, first["details"])
         self.assertIs(type(first["valence"]), float)
         self.assertIs(type(first["activity"]), float)
         self.assertIs(type(first["confidence"]), float)

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import math
 
 from .. import config
+from ..affect.space import classify_vad
 from .intents import detect_intent
 from .language import STOPWORDS, identify_language
 from .lexicon import load_lexicons, match_clause
@@ -25,6 +26,7 @@ class TextEstimate:
     dominance: float
     confidence: float
     label: str
+    label_details: dict
     language: str
     language_confidence: float
     intent: str
@@ -40,6 +42,7 @@ class TextEstimate:
             "dominance": float(self.dominance),
             "confidence": float(self.confidence),
             "label": self.label,
+            "label_details": dict(self.label_details),
             "language": self.language,
             "language_confidence": float(self.language_confidence),
             "intent": self.intent,
@@ -66,28 +69,13 @@ def _weighted_mean(contributions, field):
 
 
 def _label_for(valence, activity, dominance):
-    """Map VAD to kit labels using ordered neutral, valence, activity, and control thresholds.
+    """Choose the closest label prototype in weighted Euclidean V/A/D space.
 
-    Neutral is |V| <= neutral_radius and |A| <= high_activity. Otherwise,
-    positive V maps to joy at high activity and calm below it; negative V maps
-    to anger when D >= control_high or fear otherwise at high activity, sadness
-    at or below low_activity, and frustration between the activity bounds.
-    Remaining estimates are neutral.
+    Distance is sqrt(dV^2 + dA^2 + LABEL_D_WEIGHT*dD^2); points inside the
+    configured neutral radius are labelled neutral regardless of their nearest
+    prototype.
     """
-    if (
-        abs(valence) <= config.LABEL_NEUTRAL_RADIUS
-        and abs(activity) <= config.LABEL_ACTIVITY_HIGH
-    ):
-        return "neutral"
-    if valence >= config.LABEL_VALENCE_POSITIVE:
-        return "joy" if activity >= config.LABEL_ACTIVITY_HIGH else "calm"
-    if valence <= config.LABEL_VALENCE_NEGATIVE:
-        if activity >= config.LABEL_ACTIVITY_HIGH:
-            return "anger" if dominance >= config.LABEL_CONTROL_HIGH else "fear"
-        if activity <= config.LABEL_ACTIVITY_LOW:
-            return "sadness"
-        return "frustration"
-    return "neutral"
+    return classify_vad(valence, activity, dominance)["label"]
 
 
 def _clause_weight(clause, has_contrast):
@@ -285,12 +273,14 @@ def estimate_text(text, context_valence=0.0):
         }
         for item in all_contributions
     ]
+    label_details = classify_vad(valence, activity, dominance)
     return TextEstimate(
         valence=float(valence),
         activity=float(activity),
         dominance=float(dominance),
         confidence=float(confidence),
-        label=_label_for(valence, activity, dominance),
+        label=label_details["label"],
+        label_details=label_details,
         language=language,
         language_confidence=float(language_confidence),
         intent=intent,

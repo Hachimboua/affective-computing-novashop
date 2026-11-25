@@ -1,5 +1,5 @@
 Phase 0 baseline checksums (SHA-256)
-Tree digest algorithm: sort regular files by relative POSIX path, omit __pycache__ and *.pyc/*.pyo, then hash UTF-8 lines:
+Checksum algorithm: normalize CRLF and CR line endings to LF before hashing file contents. For trees, sort regular files by relative POSIX path, omit __pycache__ and *.pyc/*.pyo, then hash UTF-8 manifest lines:
 relative/path<TAB>sha256(file bytes)<LF>
 
 harness/ TREE_SHA256 968afd3b5d9d683bb561d489255ddd284352abf285b8d94a15805986f401c1a3 (8 files)

@@ -36,6 +36,15 @@ class Engine:
                     "d": float(estimate.dominance),
                     "c": float(estimate.confidence),
                 },
+                "second_label": estimate.label_details["second_label"],
+                "label_distance": float(
+                    estimate.label_details["label_distance"]
+                ),
+                "second_distance": (
+                    float(estimate.label_details["second_distance"])
+                    if estimate.label_details["second_distance"] is not None
+                    else None
+                ),
                 "engine_version": "0.2",
             },
         }

@@ -38,3 +38,20 @@
 - Confirm Section 0 choices for optional channels, supported languages, and
   Python compatibility target. Leave unknown facts marked `[[TODO: ...]]`;
   do not invent them.
+- Group identifier and the replacement deadline are still unknown; packaging
+  must not invent either value.
+
+## Decided by the AI, to confirm
+
+- Until the teacher clarifies the action semantics, use the continuation
+  prompt's provisional distinction: `OFFER_HUMAN` offers a transfer for a
+  human request or persistent unresolved distress; `ESCALATE` is an urgent
+  priority handover for safety, abuse, legal/authority threats, or sustained
+  severe high-activation distress. Explicit legal or safety signals take
+  priority over the emotion estimate.
+- With no real ratings present, Phase 9 will stop after implementing and
+  testing the evaluation pipeline; no placeholder ratings or metrics will be
+  created, and later report/video material will use `[[TODO]]` placeholders.
+- The student selected the optional voice channel, so implement it only after
+  the Phase 6 integration gate passes. Skip face as directed by the
+  continuation prompt.
