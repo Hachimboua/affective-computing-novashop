@@ -141,3 +141,17 @@
   and scenario behavior. Drafted `topics/topic3.md` with a measured new-message
   example, likely questions, and live-change drills. No output for the 88
   evaluation messages was generated or displayed.
+
+## 2026-11-25 - Part A verification gate
+
+- **What I asked for:** Verify the five Part A fixes with the full gate,
+  including fresh English/Portuguese generalization sentences and short Latin
+  clarification probes, without showing output for the 88 evaluation
+  messages.
+- **What the AI produced:** Added the fresh language and short-message
+  regressions. All 79 tests passed; all eight scenarios passed; the protected
+  kit verifier reported zero mismatches across 29 files; the clean-copy
+  simulation passed 79 tests and all eight scenarios; and the generalization
+  probes passed 15/15 plus 4/4. Python 3.9 is unavailable in this environment.
+- **What I changed:**
+- **How I verified it:**

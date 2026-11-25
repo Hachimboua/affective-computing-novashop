@@ -584,6 +584,62 @@ class TextEstimateTests(unittest.TestCase):
                 _, hits = match_clause(processed.clauses[0], language, lexicons)
                 self.assertIn(expected_term, [hit.entry.term for hit in hits])
 
+    def test_a3_generalization_corpus(self):
+        short_english = (
+            "Not again!",
+            "Wait, what?",
+            "This again?",
+            "Are we?",
+            "What now?",
+        )
+        short_portuguese = (
+            "E agora?",
+            "Não sei.",
+            "Que pena!",
+            "Por quê?",
+            "Já chegou?",
+        )
+        short_latin = ("wut", "huh?", "bruh", "blah")
+        shouted_english = (
+            "I AM OUTRAGED!!!",
+            "THIS IS DISGUSTING!!!",
+            "WHAT A DISGRACE!!!",
+        )
+        shouted_portuguese = (
+            "ESTOU FURIOSO COM A DEMORA!!!",
+            "ISTO É PÉSSIMO!!!",
+        )
+        corpus = (
+            short_english
+            + short_portuguese
+            + short_latin
+            + shouted_english
+            + shouted_portuguese
+        )
+        self.assert_new_sentences(corpus)
+
+        for language, sentences in (
+            ("en", short_english + shouted_english),
+            ("pt", short_portuguese + shouted_portuguese),
+        ):
+            for text in sentences:
+                with self.subTest(language=language, text=text):
+                    detected, _, flags = identify_language(
+                        preprocess(text).tokens
+                    )
+                    self.assertEqual(detected, language)
+                    self.assertNotIn("unsupported_language", flags)
+
+        for text in short_latin:
+            with self.subTest(text=text):
+                result = Engine().process(text)
+                self.assertIn("short_message", result["flags"])
+                self.assertNotIn("unsupported_language", result["flags"])
+                self.assertEqual(result["action"], "ASK_CLARIFICATION")
+                self.assertNotIn(
+                    "Please write in one of those languages.", result["reply"]
+                )
+
     def test_foreign_stopwords_override_borrowed_english_phrase(self):
         examples = (
             ("Ich bin great customer service.", "de"),

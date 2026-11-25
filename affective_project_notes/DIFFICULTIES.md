@@ -124,3 +124,11 @@
   help" step, including after sarcastic thanks. Non-closing replies now use a
   continuation step instead, with regressions for sarcastic thanks and all
   empathic, human-offer, and escalation replies in the 30-message rehearsal.
+
+## Part A verification gate
+
+- The first ad hoc generalization probe passed accented Portuguese source text
+  through a PowerShell native-command pipe, which corrupted the characters and
+  made one sentence appear unsupported. Re-ran the check with Unicode escapes
+  in the probe source; all 15 fresh English/Portuguese cases and four short
+  Latin clarification cases passed. No project code change was needed.
