@@ -65,11 +65,32 @@ class PolicyTests(unittest.TestCase):
         self.assertFalse(
             evaluation_texts.intersection(text for text, _ in examples)
         )
+        results = [
+            Engine().process(text)
+            for text, _ in examples
+        ]
         passed = sum(
-            Engine().process(text)["action"] == expected
-            for text, expected in examples
+            result["action"] == expected
+            for result, (_, expected) in zip(results, examples)
         )
         self.assertEqual(passed, 30, "rehearsal pass count: %d/30" % passed)
+        closing_phrases = (
+            "glad i could help",
+            "glad we could resolve",
+            "happy i could help",
+            "thank you for contacting novashop",
+            "have a good day",
+            "ainda bem que conseguimos resolver",
+            "fico contente por ter ajudado",
+            "obrigado por contactar a novashop",
+            "tenha um bom dia",
+            "ainda bem que pude ajudar",
+        )
+        for result in results:
+            if result["action"] in ("ANSWER_EMPATHIC", "OFFER_HUMAN", "ESCALATE"):
+                with self.subTest(action=result["action"]):
+                    for phrase in closing_phrases:
+                        self.assertNotIn(phrase, result["reply"].casefold())
 
     def test_each_action_is_reachable(self):
         examples = (
@@ -267,6 +288,7 @@ class PolicyTests(unittest.TestCase):
     def test_sarcasm_never_closes_positive(self):
         result = Engine().process("Thanks for nothing.")
         self.assertNotEqual(result["action"], "CLOSE_POSITIVE")
+        self.assertNotIn("glad i could help", result["reply"].casefold())
 
     def test_clarification_loop_is_capped(self):
         engine = Engine()

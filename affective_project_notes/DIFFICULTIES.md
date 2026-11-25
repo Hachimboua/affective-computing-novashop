@@ -117,3 +117,10 @@
   threat, and anger escalations. Emergency guidance is now isolated to the
   safety-flag reply; other escalations direct the customer to urgent human
   review in English or Portuguese.
+
+## Part A5 - non-closing replies
+
+- A non-closing action could reuse the closing-thanks intent's "glad I could
+  help" step, including after sarcastic thanks. Non-closing replies now use a
+  continuation step instead, with regressions for sarcastic thanks and all
+  empathic, human-offer, and escalation replies in the 30-message rehearsal.
