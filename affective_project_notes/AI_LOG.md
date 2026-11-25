@@ -128,3 +128,16 @@
   classifier, configured the seven kit labels, added focused and
   generalization regressions, and drafted the Topic 2 study notes. A
   Portuguese calm-lexicon coverage gap remains documented for student review.
+
+## 2026-11-25 - Phase 4 - Topic 3
+
+- **What I asked for:** Add confidence-weighted conversation state, explicit
+  trend/streak and handoff memory, an ordered R0–R7 policy, deterministic
+  English/Portuguese replies, and focused state, policy, and scenario tests.
+- **What the AI produced:** Added `engine/state/tracker.py`, the named policy
+  rules and reply templates, integrated state/action/reply details through
+  `Engine.process()`, and added regressions for hysteresis, clarification
+  caps, repeated/declined handoffs, all six actions, deterministic variants,
+  and scenario behavior. Drafted `topics/topic3.md` with a measured new-message
+  example, likely questions, and live-change drills. No output for the 88
+  evaluation messages was generated or displayed.

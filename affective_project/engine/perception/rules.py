@@ -126,7 +126,11 @@ def domain_adjustments(text, words):
     dominance = 0.0
     flags = set()
 
-    issue_context = _contains_any(normalized, config.DOMAIN_NEGATIVE_TERMS) or bool(
+    negative_event = _contains_any(normalized, config.DOMAIN_NEGATIVE_TERMS)
+    if negative_event:
+        valence += config.DOMAIN_PROBLEM_VALENCE
+        flags.add("negative_event")
+    issue_context = negative_event or bool(
         word_set.intersection(("wait", "waiting", "pending", "refund", "order", "broken"))
     )
     repeated = _contains_any(normalized, config.REPETITION_CUES) or (

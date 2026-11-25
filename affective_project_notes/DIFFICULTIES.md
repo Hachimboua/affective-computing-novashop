@@ -69,3 +69,19 @@
   assignments require the student's review, so no lexicon tier was added or
   changed; the regression set uses existing supported terms and this coverage
   gap remains a candidate for review.
+
+## Phase 4
+
+- The first scenario-policy integration missed a human offer in the repeated
+  delivery-problem scenario and offered too early in another scenario.
+  Added general delivery-problem cues and adjusted the configurable
+  persistence/human-offer thresholds; all eight scenario regression cases now
+  pass.
+- A declined handoff could still be mistaken for a fresh human request because
+  the decline sentence also contains a human-reference word. Added a
+  decline-aware guard and a regression test so the assistant neither repeats
+  the offer nor escalates that decline as a new request.
+- The Phase 3 contract regression expected a normal answer for a message whose
+  affect estimate was below the Phase 4 clarification-confidence threshold.
+  Updated the expected action to `ASK_CLARIFICATION` under `R4_UNCERTAIN`, and
+  kept the reset-determinism assertion intact.

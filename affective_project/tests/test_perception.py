@@ -458,6 +458,18 @@ class TextEstimateTests(unittest.TestCase):
                     )
                 )
 
+    def test_delivery_problem_cues_are_negative_in_both_languages(self):
+        examples = (
+            "My parcel was supposed to be here and has not arrived.",
+            "A encomenda devia chegar hoje e nunca chegou.",
+        )
+        self.assert_new_sentences(examples)
+        for text in examples:
+            with self.subTest(text=text):
+                result = estimate(text)
+                self.assertLess(result.valence, 0.0)
+                self.assertIn("negative_event", result.flags)
+
     def test_negation_shifts_polarity_without_a_full_flip(self):
         good = estimate("good")
         not_good = estimate("not good")
@@ -606,7 +618,8 @@ class TextEstimateTests(unittest.TestCase):
             first["label"],
             {"neutral", "calm", "joy", "anger", "frustration", "fear", "sadness"},
         )
-        self.assertEqual(first["action"], "ANSWER")
+        self.assertEqual(first["action"], "ASK_CLARIFICATION")
+        self.assertEqual(first["details"]["rule"], "R4_UNCERTAIN")
 
 
 if __name__ == "__main__":

@@ -122,8 +122,16 @@ DOMAIN_NEGATIVE_TERMS = frozenset(
         "cracked",
         "defective",
         "not arrived",
+        "never arrive",
+        "never arrived",
+        "never be delivered",
+        "not delivered",
+        "supposed to be here",
         "atrasado",
         "atrasada",
+        "nunca chega",
+        "nunca chegou",
+        "não foi entregue",
         "partido",
         "danificado",
         "perdido",
@@ -243,6 +251,45 @@ SAFETY_CUES = frozenset(
         "acabar com a minha vida",
     )
 )
+ABUSE_CUES = frozenset(
+    (
+        "i will hurt you",
+        "i'll hurt you",
+        "you are an idiot",
+        "you're an idiot",
+        "you are useless",
+        "vou fazer mal a ti",
+        "vou magoar-te",
+        "és um idiota",
+    )
+)
+HUMAN_DECLINED_CUES = frozenset(
+    (
+        "no thanks",
+        "not now",
+        "i do not want a human",
+        "i don't want a human",
+        "i do not want a person",
+        "não quero uma pessoa",
+        "não quero um agente",
+        "não é necessário",
+    )
+)
+AMBIGUOUS_CUES = frozenset(("ok", "okay", "whatever", "?", "hmm"))
+ACKNOWLEDGMENT_CUES = frozenset(("ok", "okay", "thanks", "thank you", "obrigado", "obrigada"))
+RESOLUTION_CUES = frozenset(
+    (
+        "that solved it",
+        "problem is solved",
+        "it is resolved",
+        "all sorted",
+        "that is all",
+        "that's all",
+        "ficou tudo resolvido",
+        "está tudo resolvido",
+        "problema resolvido",
+    )
+)
 
 SQUASH_SCALE = 1.15  # Raising it pushes estimates toward extremes sooner; lowering it keeps values near zero.
 TIER_VAD = {
@@ -270,6 +317,27 @@ LABEL_PROTOTYPES = {
     "joy": (0.75, 0.50, 0.40),
     "neutral": (0.00, 0.00, 0.00),
 }
+STATE_ALPHA = 0.50  # Raising it reacts faster but is noisier; lowering it is steadier but lags.
+STATE_HISTORY_SIZE = 8  # Raising it preserves more context; lowering it limits old turns' influence.
+STATE_TREND_WINDOW = 4  # Raising it smooths trends but reacts later; lowering it reacts faster but noisier.
+TREND_WORSENING_THRESHOLD = -0.08  # More negative needs a sharper decline; closer to zero offers help sooner.
+NEG_TURN_V = -0.25  # More negative counts fewer turns as complaints; closer to zero counts milder concerns.
+ESC_V = -0.65  # More negative escalates less often; closer to zero catches severe states sooner.
+ESC_A = 0.55  # Raising it requires more activation; lowering it increases urgent handoffs.
+ESC_TURNS = 2  # Raising it needs longer persistence; lowering it reacts to shorter severe episodes.
+ESC_NEG_STREAK = 4  # Raising it tolerates longer complaint streaks; lowering it escalates sooner.
+HUMAN_V = -0.45  # More negative delays offers; closer to zero offers a person for milder distress.
+HUMAN_STREAK = 3  # Raising it needs more negative turns; lowering it offers a person sooner.
+REPEATED_ISSUE_MIN = 2  # Raising it waits for more repeated issues; lowering it may over-offer.
+DOMAIN_PROBLEM_VALENCE = -0.25  # More negative strengthens missed-service cues; closer to zero is more conservative.
+HUMAN_OFFER_COOLDOWN_TURNS = 2  # Raising it avoids repeated offers longer; lowering it permits quicker reminders.
+CLARIFY_CONF = 0.35  # Raising it asks more clarifying questions; lowering it answers on weaker evidence.
+MAX_CLARIFY = 2  # Raising it permits longer loops; lowering it offers a human sooner.
+EMPATHY_V = -0.25  # More negative enters empathy less often; closer to zero uses empathy more readily.
+EMPATHY_EXIT_V = -0.15  # Raising it exits empathy sooner; lowering it keeps an empathetic tone longer.
+EMPATHY_MSG_V = -0.35  # More negative needs stronger message negativity; closer to zero is more responsive.
+EMPATHY_A = 0.55  # Raising it needs stronger activation; lowering it empathizes with calmer complaints.
+CLOSE_V = 0.35  # Raising it requires stronger positivity; lowering it risks premature conversation closure.
 WORD_SALIENCE = 1.00  # Raising it gives single words more influence; lowering it favors message-level cues.
 PHRASE_SALIENCE = 1.25  # Raising it trusts multiword cues more; lowering it reduces phrase dominance.
 
@@ -289,3 +357,4 @@ SARCASM_IDIOM_SCORE = 0.95  # Raising it makes idioms more decisive; lowering it
 SARCASM_INCONGRUITY_SCORE = 0.72  # Raising it requires stronger context-word mismatch; lowering it catches more possible sarcasm.
 SARCASM_QUOTED_SCORE = 0.65  # Raising it trusts quotation as sarcasm evidence less; lowering it catches more quoted irony.
 SARCASM_CONTEXT_SCORE = 0.55  # Raising it relies more on conversation context; lowering it requires stronger direct cues.
+EMPATHY_NEGATIVE_V = 0.0  # Lowering requires stronger negativity; raising empathizes at weaker negative valence.
